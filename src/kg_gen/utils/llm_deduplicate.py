@@ -332,6 +332,23 @@ class LLMDeduplicate:
 
             relations.add((s, p, o))
 
+        # Update entity_metadata keys to match deduplicated entity names
+        new_entity_metadata: dict[str, set[str]] | None = None
+        if self.graph.entity_metadata:
+            new_entity_metadata = {}
+            for original_entity, metadata_set in self.graph.entity_metadata.items():
+                # Find the deduplicated representative for this entity
+                deduped_entity = original_entity
+                for rep, cluster in entity_clusters.items():
+                    if original_entity in cluster:
+                        deduped_entity = rep
+                        break
+                # Merge metadata sets when entities are deduplicated together
+                if deduped_entity in new_entity_metadata:
+                    new_entity_metadata[deduped_entity].update(metadata_set)
+                else:
+                    new_entity_metadata[deduped_entity] = metadata_set.copy()
+
         # Create new Graph instance with deduplicated data
         deduped_graph = Graph(
             entities=entities,
@@ -339,6 +356,7 @@ class LLMDeduplicate:
             relations=relations,
             entity_clusters=entity_clusters,
             edge_clusters=edge_clusters,
+            entity_metadata=new_entity_metadata,
         )
 
         return deduped_graph

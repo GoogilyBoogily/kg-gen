@@ -148,4 +148,26 @@ def run_semhash_deduplication(
     # Remove duplicate relations
     new_relations = list(set(tuple(relation) for relation in new_relations))
 
-    return Graph(entities=new_entities, edges=new_edges, relations=new_relations)
+    # Update entity_metadata keys to match deduplicated entity names
+    new_entity_metadata: dict[str, set[str]] | None = None
+    if graph.entity_metadata:
+        new_entity_metadata = {}
+        for original_entity, metadata_set in graph.entity_metadata.items():
+            if original_entity in entities_dedup.original_map:
+                deduped_entity = entities_dedup.items_map[
+                    entities_dedup.original_map[original_entity]
+                ]
+            else:
+                deduped_entity = original_entity
+            # Merge metadata sets when entities are deduplicated together
+            if deduped_entity in new_entity_metadata:
+                new_entity_metadata[deduped_entity].update(metadata_set)
+            else:
+                new_entity_metadata[deduped_entity] = metadata_set.copy()
+
+    return Graph(
+        entities=new_entities,
+        edges=new_edges,
+        relations=new_relations,
+        entity_metadata=new_entity_metadata,
+    )

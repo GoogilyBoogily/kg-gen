@@ -1,6 +1,6 @@
 import json
 from pydantic import BaseModel, Field
-from typing import Tuple, Optional
+from typing import Any, Tuple, Optional
 
 
 # ~~~ DATA STRUCTURES ~~~
@@ -14,6 +14,8 @@ class Graph(BaseModel):
     )
     entity_clusters: Optional[dict[str, set[str]]] = None
     edge_clusters: Optional[dict[str, set[str]]] = None
+
+    entity_metadata: dict[str, set[str]] | None = None
 
     @staticmethod
     def from_file(file_path: str) -> "Graph":

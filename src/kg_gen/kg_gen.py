@@ -304,15 +304,27 @@ class KGGen:
         all_entities = set()
         all_relations = set()
         all_edges = set()
+        all_entity_metadata: dict[str, set[str]] = {}
 
         # Combine all graphs
         for graph in graphs:
             all_entities.update(graph.entities)
             all_relations.update(graph.relations)
             all_edges.update(graph.edges)
+            if graph.entity_metadata:
+                for entity, metadata_set in graph.entity_metadata.items():
+                    if entity in all_entity_metadata:
+                        all_entity_metadata[entity].update(metadata_set)
+                    else:
+                        all_entity_metadata[entity] = metadata_set.copy()
 
         # Create and return aggregated graph
-        return Graph(entities=all_entities, relations=all_relations, edges=all_edges)
+        return Graph(
+            entities=all_entities,
+            relations=all_relations,
+            edges=all_edges,
+            entity_metadata=all_entity_metadata if all_entity_metadata else None,
+        )
 
     @staticmethod
     def visualize(graph: Graph, output_path: str, open_in_browser: bool = False):
@@ -429,6 +441,7 @@ class KGGen:
             "edge_clusters": {k: list(v) for k, v in graph.edge_clusters.items()}
             if graph.edge_clusters
             else None,
+            "entity_metadata": graph.entity_metadata,
         }
 
         with open(output_path, "w") as f:
