@@ -1,6 +1,99 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional, Literal
+from pathlib import Path
 import dspy
-from pydantic import BaseModel
+import litellm
+from pydantic import BaseModel, create_model
+
+
+def _load_relations_prompt() -> str:
+    """Load the relations prompt template from file."""
+    prompt_path = Path(__file__).parent.parent / "prompts" / "relations.txt"
+    return prompt_path.read_text()
+
+
+def _create_relations_model(entities: List[str]):
+    """Dynamically create Pydantic models with entity literals for subject/object."""
+    # Create a Literal type from the entities list
+    EntityLiteral = Literal[tuple(entities)]  # type: ignore
+
+    # Create RelationItem with constrained subject/object
+    RelationItem = create_model(
+        "RelationItem",
+        subject=(EntityLiteral, ...),
+        predicate=(str, ...),
+        object=(EntityLiteral, ...),
+    )
+
+    # Create RelationsResponse containing list of RelationItem
+    RelationsResponse = create_model(
+        "RelationsResponse",
+        relations=(List[RelationItem], ...),
+    )
+
+    return RelationItem, RelationsResponse
+
+
+def _get_relations_litellm(
+    input_data: str,
+    entities: List[str],
+    model: str,
+    api_key: Optional[str] = None,
+    api_base: Optional[str] = None,
+    temperature: float = 0.0,
+) -> List[Tuple[str, str, str]]:
+    prompt_template = _load_relations_prompt()
+    entities_str = "\n".join(f"- {e}" for e in entities)
+    user_prompt = f"""
+Here is the list of entities that were previously extracted from the source text:
+
+<entities>
+{entities_str}
+</entities>
+
+Here is the source text to analyze:
+
+<text>
+{input_data}
+</text>
+    """
+
+    # Create dynamic model with entity constraints
+    _, RelationsResponse = _create_relations_model(entities)
+
+    # Build schema with additionalProperties: false (required by OpenAI)
+    schema = RelationsResponse.model_json_schema()
+    schema["additionalProperties"] = False
+    # Also need to set additionalProperties on nested objects
+    if "$defs" in schema:
+        for def_schema in schema["$defs"].values():
+            if def_schema.get("type") == "object":
+                def_schema["additionalProperties"] = False
+
+    kwargs = {
+        "model": model,
+        "input": [
+            {"role": "system", "content": prompt_template},
+            {"role": "user", "content": user_prompt},
+        ],
+        "temperature": temperature,
+        "text": {
+            "format": {
+                "type": "json_schema",
+                "name": "relations_response",
+                "schema": schema,
+                "strict": True,
+            }
+        },
+    }
+
+    if api_key:
+        kwargs["api_key"] = api_key
+    if api_base:
+        kwargs["api_base"] = api_base
+
+    response = litellm.responses(**kwargs)
+    parsed = RelationsResponse.model_validate_json(response.output[-1].content[0].text)
+    return [(r.subject, r.predicate, r.object) for r in parsed.relations]
 
 
 def extraction_sig(
@@ -62,7 +155,22 @@ def get_relations(
     entities: list[str],
     is_conversation: bool = False,
     context: str = "",
+    use_litellm_prompt: bool = False,
+    model: Optional[str] = None,
+    api_key: Optional[str] = None,
+    api_base: Optional[str] = None,
+    temperature: float = 0.0,
 ) -> List[Tuple[str, str, str]]:
+    if use_litellm_prompt and not is_conversation:
+        return _get_relations_litellm(
+            input_data,
+            entities,
+            model=model,
+            api_key=api_key,
+            api_base=api_base,
+            temperature=temperature,
+        )
+
     class Relation(BaseModel):
         """Knowledge graph subject-predicate-object tuple."""
 

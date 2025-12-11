@@ -32,13 +32,13 @@ kg = KGGen()
 
 graph = kg.generate(
     input_data=text,
-    model="openai/gpt-4o",
+    model="openai/gpt-5-nano",
     api_key=os.getenv("OPENAI_API_KEY"),
-    chunk_size=1000,
-    cluster=True,
-    temperature=0.0,
+    temperature=1.0,
+    reasoning_effort="minimal",
     context="Kingkiller Chronicles",
     output_folder="./examples/",
+    no_dspy=True,
 )
 # with open("./examples/graph.json", "r") as f:
 #     graph = Graph(**json.load(f))

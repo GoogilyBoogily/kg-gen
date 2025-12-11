@@ -98,6 +98,7 @@ def process_single_evaluation(
     reasoning_effort: str | None,
     temperature: float,
     deduplication_method: Literal["semhash", "full"] | None = "full",
+    no_dspy: bool = False,
 ) -> tuple[int, bool, str]:
     """Process a single evaluation task. Returns (index, success, message)."""
     # Build directory name based on evaluation model
@@ -109,6 +110,8 @@ def process_single_evaluation(
         dir_name += f"-{temperature}"
         if deduplication_method:
             dir_name += f"-{deduplication_method}"
+        if no_dspy:
+            dir_name += "-no-dspy"
     else:
         # For pre-generated KGs from HuggingFace dataset
         dir_name = f"hf-{evaluation_model}"
@@ -129,7 +132,7 @@ def process_single_evaluation(
 
         if evaluation_model == "local":
             # Generate the graph from text
-            graph = kggen.generate(data, deduplication_method=method)
+            graph = kggen.generate(data, deduplication_method=method, no_dspy=no_dspy)
             kg_output_file = f"experiments/MINE/results/{dir_name}/kg_{i}.json"
             KGGen.export_graph(graph, kg_output_file)
         else:
@@ -159,6 +162,7 @@ def main(
     reasoning_effort: str = None,
     temperature: float = 1.0,
     deduplication_method: Literal["semhash", "full"] | None = "semhash",
+    no_dspy: bool = False,
     max_workers: int = 64,
 ):
     # Load data from Hugging Face (with local fallback)
@@ -204,6 +208,7 @@ def main(
                 reasoning_effort,
                 temperature,
                 deduplication_method,
+                no_dspy,
             ): i
             for i, (kg, queries) in enumerate(valid_pairs)
         }

@@ -1,0 +1,46 @@
+You will be extracting entities from an article to build a high-quality knowledge graph. Your goal is to identify all important entities and categorize them consistently.
+
+Your task is to extract entities from this article. Follow these guidelines carefully.
+
+## Entity Types to Extract
+
+Identify entities that fall into these categories:
+
+- **PERSON**: Individual people (historical figures, celebrities, authors, politicians, etc.)
+- **ORGANIZATION**: Companies, institutions, government bodies, bands, sports teams, non-profits, etc.
+- **LOCATION**: Cities, countries, regions, landmarks, geographical features, buildings
+- **DATE**: Specific dates, years, time periods, decades, centuries
+- **EVENT**: Named events, wars, conferences, ceremonies, festivals, competitions
+- **WORK**: Books, films, songs, albums, artworks, publications, TV shows
+- **CONCEPT**: Important ideas, theories, movements, philosophies, fields of study, religions
+- **PRODUCT**: Specific products, technologies, inventions, software, devices
+
+## Extraction Guidelines
+
+Follow these rules when extracting entities:
+
+1. **Focus on substantive mentions**: Extract entities that are central to the article's topic or mentioned with significant detail. Avoid entities that are only mentioned in passing.
+
+2. **Use official or common names**: Use the most widely recognized or official name for each entity as it appears in the article.
+
+3. **Avoid overly generic terms**: Do not extract generic terms like "city", "book", or "person" unless they are specifically defined as concepts in the article (e.g., an article about "The concept of personhood").
+
+4. **Use full names for people**: Extract complete names as they first appear in the article (e.g., "Marie Curie" rather than just "Curie").
+
+5. **Normalize entity names**: If an entity is referred to by multiple names or variations, choose one canonical form. For example, "U.S.", "USA", and "United States" should all be normalized to "United States".
+
+6. **Extract each unique entity only once**: Even if an entity appears multiple times in the article, list it only once in your output.
+
+## Your Task
+
+Before providing your final output, work through the article systematically. In your extraction process:
+
+1. Identify the main subject or topic of the article
+2. Read through the article and list all potential entity mentions as you encounter them. Quote or write down each mention. It's OK for this section to be quite long.
+3. For each potential entity you listed, evaluate it against the extraction guidelines:
+   - Is it substantive or just a passing mention?
+   - Is it too generic?
+   - Should it be included?
+4. Determine the correct entity type for each entity you're including
+5. Identify all entities that need normalization by listing all variations you see for the same entity (e.g., "U.S.", "USA", "United States"), then choose the canonical form
+6. Note any ambiguous entities or cases where you're uncertain

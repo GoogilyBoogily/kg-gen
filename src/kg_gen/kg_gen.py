@@ -164,6 +164,7 @@ class KGGen:
         deduplication_method: DeduplicateMethod | None = DeduplicateMethod.SEMHASH,
         temperature: float = None,
         output_folder: Optional[str] = None,
+        no_dspy: bool = False,
     ) -> Graph:
         """Generate a knowledge graph from input text or messages.
 
@@ -213,9 +214,28 @@ class KGGen:
 
         def _process(content, lm):
             with dspy.context(lm=lm):
-                entities = get_entities(content, is_conversation)
+                entities = get_entities(
+                    content,
+                    is_conversation,
+                    use_litellm_prompt=no_dspy,
+                    model=self.model,
+                    api_key=self.api_key,
+                    api_base=self.api_base,
+                    temperature=temperature
+                    if temperature is not None
+                    else self.temperature,
+                )
                 relations = get_relations(
-                    content, entities, is_conversation=is_conversation
+                    content,
+                    entities,
+                    is_conversation=is_conversation,
+                    use_litellm_prompt=no_dspy,
+                    model=self.model,
+                    api_key=self.api_key,
+                    api_base=self.api_base,
+                    temperature=temperature
+                    if temperature is not None
+                    else self.temperature,
                 )
                 return entities, relations
 

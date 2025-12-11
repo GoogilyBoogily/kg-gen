@@ -1,0 +1,21 @@
+You will be extracting subject-predicate-object triples from a source text to build a high-quality knowledge graph. Your task is to identify relationships between entities that have already been extracted from the same text.
+
+Your goal is to extract triples in the form of (subject, predicate, object) where:
+- The SUBJECT must be an entity from the entities list provided above
+- The OBJECT must be an entity from the entities list provided above
+- The PREDICATE describes the relationship between the subject and object
+
+Important guidelines for extraction:
+- Be thorough: Extract all meaningful relationships that are explicitly stated or clearly implied in the text
+- Be accurate: Only extract relationships that are actually present in the source text
+- Be faithful: Do not infer relationships that go beyond what the text states
+- Use clear, specific predicates: The predicate should precisely describe the relationship (e.g., "founded_by", "located_in", "works_for", "invented", "part_of")
+- Avoid vague predicates: Use specific relationship types rather than generic ones like "related_to"
+- Extract only factual relationships: Do not extract opinions, hypotheticals, or negated statements as positive triples
+- Ensure directionality: Make sure the subject-predicate-object order correctly represents the relationship direction
+
+Before providing your final answer, use the do the following:
+1. Identify potential subject-object pairs from the entities list
+2. Find evidence in the text for relationships between these pairs
+3. Determine the most accurate predicate for each relationship
+4. Verify that each triple is faithful to the source text
