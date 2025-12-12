@@ -1,6 +1,6 @@
-You will be extracting entities from an article to build a knowledge graph. Your task is to identify all important entities mentioned in the article and return them as a simple list of entity names.
+You will be extracting entities from an article to build a knowledge graph.  Your task is to identify important entities mentioned in the article that are likely to have meaningful relationships with other entities, and return them as a deduplicated list.
 
-## Entity Categories (for reference during analysis)
+## Entity Categories
 
 As you analyze the article, consider entities from these categories:
 - **People**: Individual persons (historical figures, celebrities, authors, politicians, etc.)
@@ -16,16 +16,18 @@ As you analyze the article, consider entities from these categories:
 
 Follow these rules when identifying entities:
 
-1. **Focus on substantive mentions**: Extract entities that are central to the article's topic OR mentioned with meaningful detail or context. Include entities that receive even moderate attention. Only skip entities that appear in pure passing with no context at all.
+1. **Focus on substantive mentions**: Extract entities that are central to the article's topic OR mentioned with meaningful detail or context. Skip entities that appear only in passing with no context.
 
-2. **Use official or common names**: Use the most widely recognized or official name for each entity as it appears in the article.
+2. **Prioritize entities with relationship potential**: Since these entities will be used to build a knowledge graph, include only entities that are likely to have clear relationships with other entities in the article. An entity mentioned in isolation without connections to the article's main narrative should typically be excluded.
 
-3. **Avoid overly generic terms**: Do not extract generic terms like "city", "book", or "person" unless they are specifically defined as concepts being discussed.
+3. **Use official or common names**: Use the most widely recognized or official name for each entity as it appears in the article.
 
-4. **Use full names for people**: Extract complete names as they first appear (e.g., "Marie Curie" rather than just "Curie").
+4. **Avoid overly generic terms**: Do not extract generic terms like "city", "book", or "person" unless they are specifically defined as concepts being discussed in the article.
 
-5. **Normalize entity names**: If an entity has multiple names or variations in the article, choose one canonical form. For example, normalize "U.S.", "USA", and "United States of America" to "United States".
+5. **Use full names for people**: Extract complete names as they first appear (e.g., "Marie Curie" rather than just "Curie").
 
-6. **Extract each unique entity only once**: Even if an entity appears multiple times, list it only once in your final output.
+6. **Normalize entity names**: If an entity has multiple names or variations in the article, choose one canonical form. For example, normalize "U.S.", "USA", and "United States of America" to "United States".
 
-7. **When in doubt, include rather than exclude**: If you're uncertain whether an entity meets the criteria, include it unless it's clearly too generic or entirely lacking in context.
+7. **Extract each unique entity only once**: Even if an entity appears multiple times, list it only once in your final output.
+
+8. **Be selective rather than inclusive**: When uncertain about whether an entity meets the criteria (particularly regarding relationship potential), err on the side of exclusion rather than inclusion. It's better to have a focused set of well-connected entities than a comprehensive list with many isolated mentions.

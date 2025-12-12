@@ -13,21 +13,21 @@ def parse_relations_response(
 ) -> List[Tuple[str, str, str]]:
     """
     Parse a relations JSON response with graceful fallback.
-    
-    First attempts strict Pydantic validation. If that fails (e.g., due to 
-    EntityLiteral validation), falls back to raw JSON parsing and filters 
+
+    First attempts strict Pydantic validation. If that fails (e.g., due to
+    EntityLiteral validation), falls back to raw JSON parsing and filters
     out items with invalid subject/object.
-    
+
     Args:
         raw_json: The raw JSON string from the LLM response
         entities: List of valid entity strings
         response_model: Optional Pydantic model for strict validation
-        
+
     Returns:
         List of (subject, predicate, object) tuples with valid entities
     """
     entities_set = set(entities)
-    
+
     # Try strict Pydantic validation first if model provided
     if response_model is not None:
         try:
@@ -35,38 +35,38 @@ def parse_relations_response(
             return [(r.subject, r.predicate, r.object) for r in parsed.relations]
         except ValidationError:
             pass  # Fall through to JSON parsing
-    
+
     # Fallback: parse as raw JSON and filter
     try:
         data = json.loads(raw_json)
     except json.JSONDecodeError:
         return []
-    
+
     # Handle both {"relations": [...]} and direct list formats
     items = data.get("relations", data) if isinstance(data, dict) else data
-    
+
     if not isinstance(items, list):
         return []
-    
+
     relations = []
     for item in items:
         if not isinstance(item, dict):
             continue
-            
+
         subject = item.get("subject")
         predicate = item.get("predicate")
         obj = item.get("object")
-        
+
         # Skip if missing required fields
         if not all([subject, predicate, obj]):
             continue
-            
+
         # Skip if subject or object not in valid entities
         if subject not in entities_set or obj not in entities_set:
             continue
-            
+
         relations.append((subject, predicate, obj))
-    
+
     return relations
 
 
@@ -215,6 +215,11 @@ def fallback_extraction_sig(
     return Relation, extraction_sig(Relation, is_conversation, context)
 
 
+def _filter_entities(entities: List[str]) -> List[str]:
+    """Filter out entities that contain backslashes."""
+    return [e for e in entities if '"' not in e] # not received by oai api
+
+
 def get_relations(
     input_data: str,
     entities: list[str],
@@ -226,6 +231,9 @@ def get_relations(
     api_base: Optional[str] = None,
     temperature: float = 0.0,
 ) -> List[Tuple[str, str, str]]:
+    # Filter out entities containing backslashes
+    entities = _filter_entities(entities)
+
     if use_litellm_prompt and not is_conversation:
         return _get_relations_litellm(
             input_data,
