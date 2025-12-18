@@ -104,12 +104,8 @@ def main():
 
     # MCP subcommand
     mcp_parser = subparsers.add_parser("mcp", help="Start the MCP server")
-    mcp_parser.add_argument(
-        "--model", help="Model to use (e.g., openai/gpt-4o)", default=None
-    )
-    mcp_parser.add_argument(
-        "--storage-path", help="Path for memory storage file", default=None
-    )
+    mcp_parser.add_argument("--model", help="Model to use (e.g., openai/gpt-4o)", default=None)
+    mcp_parser.add_argument("--storage-path", help="Path for memory storage file", default=None)
     mcp_parser.add_argument(
         "--keep-memory",
         action="store_true",

@@ -278,9 +278,7 @@ def test_error_handling_in_retrieve_memories():
     mock_graph.entities = {"test"}
     # Make len() work but cause an error in the comprehension
     mock_graph.entities.__len__ = MagicMock(return_value=1)
-    mock_graph.entities.__iter__ = MagicMock(
-        side_effect=Exception("Test iteration error")
-    )
+    mock_graph.entities.__iter__ = MagicMock(side_effect=Exception("Test iteration error"))
 
     with patch("server.memory_graph", mock_graph):
         result = server.retrieve_relevant_memories.fn("test")

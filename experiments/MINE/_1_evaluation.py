@@ -34,9 +34,7 @@ class EvaluateResponse(dspy.Signature):
 
     context: str = dspy.InputField(desc="The context to evaluate")
     correct_answer: str = dspy.InputField(desc="The correct answer to check for")
-    evaluation: int = dspy.OutputField(
-        desc="1 if context contains the correct answer, 0 otherwise"
-    )
+    evaluation: int = dspy.OutputField(desc="1 if context contains the correct answer, 0 otherwise")
 
 
 # Create DSPy module for evaluation
@@ -62,9 +60,7 @@ def evaluate_accuracy(
     graph: nx.DiGraph,
     output_file: str,
 ):
-    print(
-        f"Graph has {graph.number_of_nodes()} nodes and {graph.number_of_edges()} edges."
-    )
+    print(f"Graph has {graph.number_of_nodes()} nodes and {graph.number_of_edges()} edges.")
     correct = 0
     results = []
 
@@ -121,11 +117,7 @@ def process_single_evaluation(
         if not deduplication_method:
             method = None
         else:
-            method = (
-                DeduplicateMethod.SEMHASH
-                if deduplication_method == "semhash"
-                else DeduplicateMethod.FULL
-            )
+            method = DeduplicateMethod.SEMHASH if deduplication_method == "semhash" else DeduplicateMethod.FULL
 
         if evaluation_model == "local":
             # Generate the graph from text
@@ -183,9 +175,7 @@ def main(
         api_base=api_base_url,
         max_tokens=64000,
     )
-    valid_pairs = [
-        (kg, queries) for kg, queries in zip(kg_data, queries) if kg is not None
-    ]
+    valid_pairs = [(kg, queries) for kg, queries in zip(kg_data, queries) if kg is not None]
 
     print(f"Processing {len(valid_pairs)} evaluations with {max_workers} workers...")
 

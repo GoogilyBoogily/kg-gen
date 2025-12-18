@@ -1,4 +1,4 @@
-from typing import Union, List, Dict, Optional
+from typing import Union, List, Dict, Optional, Any
 from typing_extensions import deprecated
 
 from kg_gen.steps._1_get_entities import get_entities
@@ -7,6 +7,12 @@ from kg_gen.steps._3_deduplicate import run_deduplication, DeduplicateMethod
 from kg_gen.utils.chunk_text import chunk_text
 from kg_gen.utils.visualize_kg import visualize as visualize_kg
 from kg_gen.models import Graph
+from kg_gen.batch import (
+    BatchRequestConfig,
+    build_entity_extraction_requests,
+    build_relation_extraction_requests,
+    build_deduplication_requests,
+)
 import dspy
 import json
 import os
@@ -126,9 +132,7 @@ class KGGen:
                 api_base=self.api_base,
                 cache=not self.disable_cache,
                 model_type="responses" if self.model.startswith("openai/") else "chat",
-                allowed_openai_params=["reasoning_effort"]
-                if self.api_base is None
-                else None,
+                allowed_openai_params=["reasoning_effort"] if self.api_base is None else None,
             )
         else:
             self.lm = dspy.LM(
@@ -139,9 +143,7 @@ class KGGen:
                 reasoning_effort=self.reasoning_effort,
                 cache=not self.disable_cache,
                 model_type="responses" if self.model.startswith("openai/") else "chat",
-                allowed_openai_params=["reasoning_effort"]
-                if self.api_base is None
-                else None,
+                allowed_openai_params=["reasoning_effort"] if self.api_base is None else None,
             )
 
     @staticmethod
@@ -187,14 +189,8 @@ class KGGen:
             # Extract text from messages
             text_content = []
             for message in input_data:
-                if (
-                    not isinstance(message, dict)
-                    or "role" not in message
-                    or "content" not in message
-                ):
-                    raise ValueError(
-                        "Messages must be dicts with 'role' and 'content' keys"
-                    )
+                if not isinstance(message, dict) or "role" not in message or "content" not in message:
+                    raise ValueError("Messages must be dicts with 'role' and 'content' keys")
                 if message["role"] in ["user", "assistant"]:
                     text_content.append(f"{message['role']}: {message['content']}")
 
@@ -216,9 +212,7 @@ class KGGen:
         def _process(content, lm):
             with dspy.context(lm=lm):
                 entities = get_entities(content, is_conversation)
-                relations = get_relations(
-                    content, entities, is_conversation=is_conversation
-                )
+                relations = get_relations(content, entities, is_conversation=is_conversation)
                 return entities, relations
 
         if not chunk_size:
@@ -226,9 +220,7 @@ class KGGen:
                 entities, relations = _process(processed_input, self.lm)
             except Exception as e:
                 if "context length" in str(e).lower():
-                    logger.warning(
-                        f"Context length error: {e}. Chunking text with chunk size 16384."
-                    )
+                    logger.warning(f"Context length error: {e}. Chunking text with chunk size 16384.")
                     chunk_size = 16384
                 else:
                     raise e
@@ -239,9 +231,7 @@ class KGGen:
             relations = set()
 
             with ThreadPoolExecutor() as executor:
-                future_to_chunk = {
-                    executor.submit(_process, chunk, self.lm): chunk for chunk in chunks
-                }
+                future_to_chunk = {executor.submit(_process, chunk, self.lm): chunk for chunk in chunks}
 
                 for future in as_completed(future_to_chunk):
                     chunk_entities, chunk_relations = future.result()
@@ -255,9 +245,7 @@ class KGGen:
         )
 
         if deduplication_method:
-            graph = self.deduplicate(
-                graph, method=deduplication_method, context=context
-            )
+            graph = self.deduplicate(graph, method=deduplication_method, context=context)
 
         if output_folder:
             self.export_graph(graph, os.path.join(output_folder, "graph.json"))
@@ -332,9 +320,7 @@ class KGGen:
 
     # ====== Retrieval Methods ======
 
-    def _parse_embedding_model(
-        self, model: Optional[SentenceTransformer] = None
-    ) -> Optional[SentenceTransformer]:
+    def _parse_embedding_model(self, model: Optional[SentenceTransformer] = None) -> Optional[SentenceTransformer]:
         if model is None:
             model = self.retrieval_model
         if model is None:
@@ -438,9 +424,7 @@ class KGGen:
             "entity_clusters": {k: list(v) for k, v in graph.entity_clusters.items()}
             if graph.entity_clusters
             else None,
-            "edge_clusters": {k: list(v) for k, v in graph.edge_clusters.items()}
-            if graph.edge_clusters
-            else None,
+            "edge_clusters": {k: list(v) for k, v in graph.edge_clusters.items()} if graph.edge_clusters else None,
             "entity_metadata": graph.entity_metadata,
         }
 
@@ -473,3 +457,102 @@ class KGGen:
             "completion_tokens": total_completion_tokens,
             "total_tokens": total_tokens,
         }
+
+    # ====== Batch API Methods ======
+
+    def build_entity_extraction_requests(
+        self,
+        texts: List[Dict[str, Any]],
+        config: BatchRequestConfig,
+        chunk_size: Optional[int] = None,
+    ) -> List[Dict[str, Any]]:
+        """Build entity extraction requests for the OpenAI Batch API.
+
+        Args:
+            texts: List of content dictionaries with:
+                - content_id: UUID of the content
+                - text: Text to extract entities from
+                - is_conversation: Whether text is conversational (optional)
+            config: Batch request configuration
+            chunk_size: Optional chunk size for splitting large texts
+
+        Returns:
+            List of request dictionaries ready for JSONL serialization:
+            [{"custom_id": "...", "body": {...}}, ...]
+
+        Example:
+            >>> kg = KGGen(model="openai/gpt-4o")
+            >>> config = BatchRequestConfig(model="gpt-4o")
+            >>> requests = kg.build_entity_extraction_requests(
+            ...     texts=[
+            ...         {"content_id": "c1", "text": "Link is the hero of Hyrule..."},
+            ...     ],
+            ...     config=config,
+            ... )
+        """
+        return build_entity_extraction_requests(texts, config, chunk_size)
+
+    def build_relation_extraction_requests(
+        self,
+        texts: List[Dict[str, Any]],
+        entities_by_content: Dict[str, List[str]],
+        config: BatchRequestConfig,
+        chunk_size: Optional[int] = None,
+        context: str = "",
+    ) -> List[Dict[str, Any]]:
+        """Build relation extraction requests for the OpenAI Batch API.
+
+        Args:
+            texts: List of content dictionaries with:
+                - content_id: UUID of the content
+                - text: Text to extract relations from
+                - is_conversation: Whether text is conversational (optional)
+            entities_by_content: Map of content_id to entities (from Phase 1)
+            config: Batch request configuration
+            chunk_size: Optional chunk size for splitting large texts
+            context: Additional extraction context
+
+        Returns:
+            List of request dictionaries ready for JSONL serialization
+
+        Example:
+            >>> # After Phase 1 entity extraction
+            >>> entities_by_content = {"c1": ["Link", "Hyrule", "Zelda"]}
+            >>> requests = kg.build_relation_extraction_requests(
+            ...     texts=[{"content_id": "c1", "text": "Link is the hero..."}],
+            ...     entities_by_content=entities_by_content,
+            ...     config=config,
+            ... )
+        """
+        return build_relation_extraction_requests(texts, entities_by_content, config, chunk_size, context)
+
+    def build_deduplication_requests(
+        self,
+        items: List[str],
+        candidates_per_item: Dict[str, List[str]],
+        item_type: str = "entity",
+        config: Optional[BatchRequestConfig] = None,
+    ) -> List[Dict[str, Any]]:
+        """Build deduplication requests for the OpenAI Batch API.
+
+        Args:
+            items: List of items to deduplicate
+            candidates_per_item: Map of item to potential duplicate candidates
+            item_type: Type of items ('entity' or 'edge')
+            config: Batch request configuration (uses defaults if not provided)
+
+        Returns:
+            List of request dictionaries ready for JSONL serialization
+
+        Example:
+            >>> candidates = {"Link": ["LINK", "link", "The Hero Link"]}
+            >>> requests = kg.build_deduplication_requests(
+            ...     items=["Link"],
+            ...     candidates_per_item=candidates,
+            ...     item_type="entity",
+            ...     config=config,
+            ... )
+        """
+        if config is None:
+            config = BatchRequestConfig()
+        return build_deduplication_requests(items, candidates_per_item, item_type, config)

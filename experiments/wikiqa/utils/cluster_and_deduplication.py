@@ -61,17 +61,11 @@ class KGAssistedRAG:
         os.makedirs(self.output_folder, exist_ok=True)
 
         # Cache embeddings and BM25 tokens for nodes
-        self.node_encoder = SentenceTransformer(
-            "sentence-transformers/all-mpnet-base-v2"
-        )
+        self.node_encoder = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
 
         # Define cache file paths for nodes
-        node_embeddings_cache_path = os.path.join(
-            self.output_folder, "node_embeddings.npy"
-        )
-        node_bm25_tokens_cache_path = os.path.join(
-            self.output_folder, "node_bm25_tokens.json"
-        )
+        node_embeddings_cache_path = os.path.join(self.output_folder, "node_embeddings.npy")
+        node_bm25_tokens_cache_path = os.path.join(self.output_folder, "node_bm25_tokens.json")
 
         # Check if cached node embeddings exist
         if os.path.exists(node_embeddings_cache_path):
@@ -79,9 +73,7 @@ class KGAssistedRAG:
             self.node_embeddings = np.load(node_embeddings_cache_path)
         else:
             print("Generating node embeddings...")
-            self.node_embeddings = self.node_encoder.encode(
-                self.nodes, show_progress_bar=True
-            )
+            self.node_embeddings = self.node_encoder.encode(self.nodes, show_progress_bar=True)
             # Save embeddings to cache
             np.save(node_embeddings_cache_path, self.node_embeddings)
             print(f"Saved node embeddings to cache: {node_embeddings_cache_path}")
@@ -103,17 +95,11 @@ class KGAssistedRAG:
         self.node_bm25 = BM25Okapi(self.node_bm25_tokenized)
 
         # Cache embeddings and BM25 tokens for edges
-        self.edge_encoder = SentenceTransformer(
-            "sentence-transformers/all-mpnet-base-v2"
-        )
+        self.edge_encoder = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
 
         # Define cache file paths for edges
-        edge_embeddings_cache_path = os.path.join(
-            self.output_folder, "edge_embeddings.npy"
-        )
-        edge_bm25_tokens_cache_path = os.path.join(
-            self.output_folder, "edge_bm25_tokens.json"
-        )
+        edge_embeddings_cache_path = os.path.join(self.output_folder, "edge_embeddings.npy")
+        edge_bm25_tokens_cache_path = os.path.join(self.output_folder, "edge_bm25_tokens.json")
 
         # Check if cached edge embeddings exist
         if os.path.exists(edge_embeddings_cache_path):
@@ -121,9 +107,7 @@ class KGAssistedRAG:
             self.edge_embeddings = np.load(edge_embeddings_cache_path)
         else:
             print("Generating edge embeddings...")
-            self.edge_embeddings = self.edge_encoder.encode(
-                self.edges, show_progress_bar=True
-            )
+            self.edge_embeddings = self.edge_encoder.encode(self.edges, show_progress_bar=True)
             # Save embeddings to cache
             np.save(edge_embeddings_cache_path, self.edge_embeddings)
             print(f"Saved edge embeddings to cache: {edge_embeddings_cache_path}")
@@ -144,9 +128,7 @@ class KGAssistedRAG:
         # Always rebuild BM25 from tokens
         self.edge_bm25 = BM25Okapi(self.edge_bm25_tokenized)
 
-    def get_relevant_items(
-        self, query: str, top_k: int = 50, type: str = "node"
-    ) -> list[str]:
+    def get_relevant_items(self, query: str, top_k: int = 50, type: str = "node") -> list[str]:
         """
         Use rank fusion of BM25 + embedding to retrieve top-k nodes.
         """
@@ -154,9 +136,7 @@ class KGAssistedRAG:
 
         # BM25
         bm25_scores = (
-            self.node_bm25.get_scores(query_tokens)
-            if type == "node"
-            else self.edge_bm25.get_scores(query_tokens)
+            self.node_bm25.get_scores(query_tokens) if type == "node" else self.edge_bm25.get_scores(query_tokens)
         )
 
         # Embedding
@@ -181,24 +161,16 @@ class KGAssistedRAG:
         for embedding_type, embeddings in embedding_sets.items():
             # Check if clusters already exist
             if embedding_type == "node":
-                node_clusters_path = os.path.join(
-                    self.output_folder, "node_clusters.json"
-                )
+                node_clusters_path = os.path.join(self.output_folder, "node_clusters.json")
                 if os.path.exists(node_clusters_path):
-                    print(
-                        f"Node clusters already exist at {node_clusters_path}, loading existing clusters"
-                    )
+                    print(f"Node clusters already exist at {node_clusters_path}, loading existing clusters")
                     with open(node_clusters_path, "r") as f:
                         self.node_clusters = json.load(f)
                     continue
             elif embedding_type == "edge":
-                edge_clusters_path = os.path.join(
-                    self.output_folder, "edge_clusters.json"
-                )
+                edge_clusters_path = os.path.join(self.output_folder, "edge_clusters.json")
                 if os.path.exists(edge_clusters_path):
-                    print(
-                        f"Edge clusters already exist at {edge_clusters_path}, loading existing clusters"
-                    )
+                    print(f"Edge clusters already exist at {edge_clusters_path}, loading existing clusters")
                     with open(edge_clusters_path, "r") as f:
                         self.edge_clusters = json.load(f)
                     continue
@@ -231,44 +203,32 @@ class KGAssistedRAG:
 
             # Add unassigned items as their own cluster if any exist
             if len(unassigned) > 0:
-                print(
-                    f"Adding {len(unassigned)} unassigned items as a separate cluster"
-                )
+                print(f"Adding {len(unassigned)} unassigned items as a separate cluster")
                 clusters.append(unassigned.tolist())
             else:
                 print("No unassigned items to add as a cluster")
 
             # Save clusters to JSON files
             cluster_type = embedding_type  # 'node' or 'edge'
-            clusters_path = os.path.join(
-                self.output_folder, f"{cluster_type}_clusters.json"
-            )
+            clusters_path = os.path.join(self.output_folder, f"{cluster_type}_clusters.json")
 
             # Print debug information about clusters
             print(f"Number of {cluster_type} clusters: {len(clusters)}")
             print(f"First cluster size: {len(clusters[0])}")
             print(f"First few items in first cluster: {clusters[0][:5]}")
             print(f"Last cluster size: {len(clusters[-1])}")
-            print(
-                f"Distribution of cluster sizes: {[len(clust) for clust in clusters[:5]]}..."
-            )
+            print(f"Distribution of cluster sizes: {[len(clust) for clust in clusters[:5]]}...")
 
             # Convert clusters to JSON-serializable format - save names instead of indices
             if cluster_type == "node":
                 print("Converting node indices to node names...")
-                clusters_data = [
-                    [self.nodes[idx] for idx in cluster] for cluster in clusters
-                ]
-                print(
-                    f"Sample of first cluster after conversion: {clusters_data[0][:3]}"
-                )
+                clusters_data = [[self.nodes[idx] for idx in cluster] for cluster in clusters]
+                print(f"Sample of first cluster after conversion: {clusters_data[0][:3]}")
                 # Add node clusters to self
                 self.node_clusters = clusters_data
             else:  # edge
                 print("Processing edge clusters...")
-                clusters_data = [
-                    [self.edges[idx] for idx in cluster] for cluster in clusters
-                ]
+                clusters_data = [[self.edges[idx] for idx in cluster] for cluster in clusters]
                 print(f"Edge clusters data is empty: {len(clusters_data) == 0}")
                 # Add edge clusters to self
                 self.edge_clusters = clusters_data
@@ -280,9 +240,7 @@ class KGAssistedRAG:
 
             print(f"{cluster_type.capitalize()} clusters saved to {clusters_path}")
 
-    def deduplicate_cluster(
-        self, cluster: list[str], type: str = "node"
-    ) -> tuple[set, dict[str, list[str]]]:
+    def deduplicate_cluster(self, cluster: list[str], type: str = "node") -> tuple[set, dict[str, list[str]]]:
         cluster = cluster.copy()
 
         items = set()
@@ -297,27 +255,20 @@ class KGAssistedRAG:
             processed_count += 1
             item = cluster.pop()
 
-            print(
-                f"[{processed_count}/{processed_count + len(cluster)}] Processing {singular_type}: '{item}'"
-            )
+            print(f"[{processed_count}/{processed_count + len(cluster)}] Processing {singular_type}: '{item}'")
 
             relevant_items = self.get_relevant_items(item, 16, type)
 
             print(f"  Found {len(relevant_items)} relevant {plural_type} for '{item}'")
             if len(relevant_items) > 0:
-                print(
-                    f"  Sample relevant items: {relevant_items[:3]}"
-                    + ("..." if len(relevant_items) > 3 else "")
-                )
+                print(f"  Sample relevant items: {relevant_items[:3]}" + ("..." if len(relevant_items) > 3 else ""))
 
             class Deduplicate(dspy.Signature):
                 __doc__ = f"""Find duplicate {plural_type} for the item and an alias that best represents the duplicates. Duplicates are those that are the same in meaning, such as with variation in tense, plural form, stem form, case, abbreviation, shorthand. Return an empty list if there are none. 
                 """
                 item: str = dspy.InputField()
                 set: list[str] = dspy.InputField()
-                duplicates: list[str] = dspy.OutputField(
-                    description="Exact matches to items in {plural_type} set"
-                )
+                duplicates: list[str] = dspy.OutputField(description="Exact matches to items in {plural_type} set")
                 alias: str = dspy.OutputField(
                     description=f"Best {singular_type} name to represent the duplicates, ideally from the {plural_type} set"
                 )
@@ -331,9 +282,7 @@ class KGAssistedRAG:
 
             if len(duplicates) > 0:
                 print(f"  ✓ Found {len(duplicates)} duplicates for '{item}'")
-                print(
-                    f"  → Using alias '{result.alias}' to represent: '{item}' and {duplicates}"
-                )
+                print(f"  → Using alias '{result.alias}' to represent: '{item}' and {duplicates}")
                 item_clusters[result.alias] = {item}
                 for duplicate in duplicates:
                     cluster.remove(duplicate)
@@ -342,16 +291,12 @@ class KGAssistedRAG:
                 print(f"  ✗ No duplicates found for '{item}', keeping as is")
                 item_clusters[item] = {item}
 
-        print(
-            f"Deduplication complete: {len(items)} unique {plural_type} from original {processed_count}"
-        )
+        print(f"Deduplication complete: {len(items)} unique {plural_type} from original {processed_count}")
 
         return items, item_clusters
 
     def deduplicate(self) -> Graph:
-        lm = dspy.LM(
-            model="gemini/gemini-2.0-flash", api_key=os.getenv("GOOGLE_API_KEY")
-        )
+        lm = dspy.LM(model="gemini/gemini-2.0-flash", api_key=os.getenv("GOOGLE_API_KEY"))
         dspy.configure(lm=lm)
 
         # Check if intermediate progress exists and load it
@@ -371,17 +316,11 @@ class KGAssistedRAG:
                 edges = set(progress.get("edges", []))
 
                 # Convert lists back to sets in the dictionaries
-                entity_clusters = {
-                    k: set(v) for k, v in progress.get("entity_clusters", {}).items()
-                }
-                edge_clusters = {
-                    k: set(v) for k, v in progress.get("edge_clusters", {}).items()
-                }
+                entity_clusters = {k: set(v) for k, v in progress.get("entity_clusters", {}).items()}
+                edge_clusters = {k: set(v) for k, v in progress.get("edge_clusters", {}).items()}
 
                 print(f"Loaded {len(entities)} entities, {len(edges)} edges")
-                print(
-                    f"Loaded {len(entity_clusters)} entity clusters and {len(edge_clusters)} edge clusters"
-                )
+                print(f"Loaded {len(entity_clusters)} entity clusters and {len(edge_clusters)} edge clusters")
             except Exception as e:
                 print(f"Error loading progress file: {e}")
                 print("Starting deduplication from scratch")
@@ -399,9 +338,7 @@ class KGAssistedRAG:
 
             # Save progress every 10 clusters
             if (i + 1) % 10 == 0:
-                print(
-                    f"Submitted {i + 1}/{len(self.node_clusters)} node clusters for processing"
-                )
+                print(f"Submitted {i + 1}/{len(self.node_clusters)} node clusters for processing")
 
         # Process edge clusters in parallel
         edge_futures = []
@@ -410,9 +347,7 @@ class KGAssistedRAG:
 
             # Save progress every 10 clusters
             if (i + 1) % 10 == 0:
-                print(
-                    f"Submitted {i + 1}/{len(self.edge_clusters)} edge clusters for processing"
-                )
+                print(f"Submitted {i + 1}/{len(self.edge_clusters)} edge clusters for processing")
 
         # Collect results from node futures
         for i, future in enumerate(node_futures):
@@ -423,9 +358,7 @@ class KGAssistedRAG:
 
                 # Save progress every 10 processed results
                 print(f"Processed {i + 1}/{len(node_futures)} node cluster results")
-                self._save_intermediate_progress(
-                    entities, edges, entity_clusters, edge_clusters
-                )
+                self._save_intermediate_progress(entities, edges, entity_clusters, edge_clusters)
 
             except Exception as e:
                 print(f"Error processing node cluster {i}: {e}")
@@ -440,17 +373,13 @@ class KGAssistedRAG:
                 # Save progress every 10 processed results
                 # if (i + 1) % 10 == 0:
                 print(f"Processed {i + 1}/{len(edge_futures)} edge cluster results")
-                self._save_intermediate_progress(
-                    entities, edges, entity_clusters, edge_clusters
-                )
+                self._save_intermediate_progress(entities, edges, entity_clusters, edge_clusters)
 
             except Exception as e:
                 print(f"Error processing edge cluster {i}: {e}")
 
         # Final save of all progress
-        self._save_intermediate_progress(
-            entities, edges, entity_clusters, edge_clusters
-        )
+        self._save_intermediate_progress(entities, edges, entity_clusters, edge_clusters)
         print("Finished processing all clusters")
 
         # Update relations based on clusters
@@ -503,14 +432,10 @@ class KGAssistedRAG:
                     "entities": list(deduped_kg.entities),
                     "edges": list(deduped_kg.edges),
                     "relations": [list(r) for r in deduped_kg.relations],
-                    "entity_clusters": {
-                        k: list(v) for k, v in deduped_kg.entity_clusters.items()
-                    }
+                    "entity_clusters": {k: list(v) for k, v in deduped_kg.entity_clusters.items()}
                     if deduped_kg.entity_clusters
                     else None,
-                    "edge_clusters": {
-                        k: list(v) for k, v in deduped_kg.edge_clusters.items()
-                    }
+                    "edge_clusters": {k: list(v) for k, v in deduped_kg.edge_clusters.items()}
                     if deduped_kg.edge_clusters
                     else None,
                     "entities_chunk_ids": deduped_kg.entities_chunk_ids,
@@ -524,9 +449,7 @@ class KGAssistedRAG:
 
         return deduped_kg
 
-    def _save_intermediate_progress(
-        self, entities, edges, entity_clusters, edge_clusters
-    ):
+    def _save_intermediate_progress(self, entities, edges, entity_clusters, edge_clusters):
         """Save intermediate progress during deduplication"""
         try:
             # Create output directory if it doesn't exist
@@ -588,9 +511,7 @@ if __name__ == "__main__":
 
         end_time = time.time()
         elapsed_time = end_time - start_time
-        print(
-            f"\nProcessing time for {kg_path}: {elapsed_time:.2f} seconds ({elapsed_time / 60:.2f} minutes)"
-        )
+        print(f"\nProcessing time for {kg_path}: {elapsed_time:.2f} seconds ({elapsed_time / 60:.2f} minutes)")
         # Log processing time to a separate log file
         log_dir = Path("logs")
         log_dir.mkdir(exist_ok=True)

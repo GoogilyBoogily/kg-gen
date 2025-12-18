@@ -107,11 +107,7 @@ def load_kg_queries_and_essays() -> List[Dict[str, Any]]:
         generated_queries = all_answers[idx - 1] if idx - 1 < len(all_answers) else []
         generated_queries = [qa["answer"] for qa in generated_queries]
 
-        essay = (
-            all_essays[idx - 1]
-            if idx - 1 < len(all_essays)
-            else {"topic": "", "content": ""}
-        )
+        essay = all_essays[idx - 1] if idx - 1 < len(all_essays) else {"topic": "", "content": ""}
 
         entry = {
             "id": idx,
@@ -193,9 +189,7 @@ def main():
     """Main function with options"""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Upload KG evaluation dataset to Hugging Face"
-    )
+    parser = argparse.ArgumentParser(description="Upload KG evaluation dataset to Hugging Face")
     parser.add_argument(
         "--repo-name",
         default="kg-gen-MINE-evaluation-dataset",

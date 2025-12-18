@@ -20,10 +20,6 @@ class ConversationEntities(dspy.Signature):
 
 
 def get_entities(input_data: str, is_conversation: bool = False) -> List[str]:
-    extract = (
-        dspy.Predict(ConversationEntities)
-        if is_conversation
-        else dspy.Predict(TextEntities)
-    )
+    extract = dspy.Predict(ConversationEntities) if is_conversation else dspy.Predict(TextEntities)
     result = extract(source_text=input_data)
     return result.entities

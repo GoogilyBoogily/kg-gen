@@ -10,9 +10,7 @@ OUTPUT_ARTICLES_DIR = f"{BASE_PATH}/articles"
 OUTPUT_KG_DIR = f"{BASE_PATH}/kgs"
 DEFAULT_WIKIPEDIA_USER_AGENT = "MyWikiQADataFetcher/1.0 (example@example.com)"
 
-wiki_api = wikipediaapi.Wikipedia(
-    language="en", user_agent=DEFAULT_WIKIPEDIA_USER_AGENT
-)
+wiki_api = wikipediaapi.Wikipedia(language="en", user_agent=DEFAULT_WIKIPEDIA_USER_AGENT)
 
 
 def download_and_save_split(split_name: str, base_output_path: str):
@@ -27,9 +25,7 @@ def download_and_save_split(split_name: str, base_output_path: str):
         df = pd.read_parquet(hf_path)
         print(f"Saving {split_name} data to {csv_file_path}...")
         df.to_csv(csv_file_path, index=False)
-        print(
-            f"{split_name.capitalize()} dataset successfully downloaded and saved to {csv_file_path}"
-        )
+        print(f"{split_name.capitalize()} dataset successfully downloaded and saved to {csv_file_path}")
         print(f"First 5 rows of {split_name}.csv:")
         print(df.head())
     except Exception as e:

@@ -77,11 +77,7 @@ class DeduplicateList:
         for duplicate in duplicates:
             original = duplicate.record
             # Check if duplicates list is not empty before accessing
-            if (
-                duplicate.duplicates
-                and len(duplicate.duplicates) > 0
-                and len(duplicate.duplicates[0]) > 0
-            ):
+            if duplicate.duplicates and len(duplicate.duplicates) > 0 and len(duplicate.duplicates[0]) > 0:
                 duplicate_value = duplicate.duplicates[0][0]
                 self.items_map[original] = self.items_map[duplicate_value]
                 if not original in self.duplicates:
@@ -113,18 +109,14 @@ def run_semhash_deduplication(
         # Handle case where entity might not be in original_map due to normalization
         first_entity_original = relation[0]
         if first_entity_original in entities_dedup.original_map:
-            first_entity = entities_dedup.items_map[
-                entities_dedup.original_map[first_entity_original]
-            ]
+            first_entity = entities_dedup.items_map[entities_dedup.original_map[first_entity_original]]
         else:
             # If not found, use the original entity (it might have been normalized differently)
             first_entity = first_entity_original
 
         second_entity_original = relation[2]
         if second_entity_original in entities_dedup.original_map:
-            second_entity = entities_dedup.items_map[
-                entities_dedup.original_map[second_entity_original]
-            ]
+            second_entity = entities_dedup.items_map[entities_dedup.original_map[second_entity_original]]
         else:
             # If not found, use the original entity
             second_entity = second_entity_original
@@ -139,9 +131,7 @@ def run_semhash_deduplication(
         return [first_entity, edge, second_entity]
 
     # Deduplicate the graph
-    new_entities = [
-        entities_dedup.items_map[item] for item in entities_dedup.deduplicated
-    ]
+    new_entities = [entities_dedup.items_map[item] for item in entities_dedup.deduplicated]
     new_edges = [edges_dedup.items_map[item] for item in edges_dedup.deduplicated]
     new_relations = [_get_relation(relation) for relation in graph.relations]
 
@@ -154,9 +144,7 @@ def run_semhash_deduplication(
         new_entity_metadata = {}
         for original_entity, metadata_set in graph.entity_metadata.items():
             if original_entity in entities_dedup.original_map:
-                deduped_entity = entities_dedup.items_map[
-                    entities_dedup.original_map[original_entity]
-                ]
+                deduped_entity = entities_dedup.items_map[entities_dedup.original_map[original_entity]]
             else:
                 deduped_entity = original_entity
             # Merge metadata sets when entities are deduplicated together

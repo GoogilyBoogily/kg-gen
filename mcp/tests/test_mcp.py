@@ -41,9 +41,7 @@ async def init_mcp_server(storage_path=None):
         env["KG_STORAGE_PATH"] = storage_path
 
     # Create server parameters
-    server_params = StdioServerParameters(
-        command="fastmcp", args=["run", str(server_path)], env=env
-    )
+    server_params = StdioServerParameters(command="fastmcp", args=["run", str(server_path)], env=env)
 
     return server_params
 
@@ -88,18 +86,12 @@ async def test_retrieve_relevant_memories_tool(temp_storage_dir):
 
             # Now retrieve relevant memories
             query = "Who works at TechCorp?"
-            result = await session.call_tool(
-                "retrieve_relevant_memories", {"query": query}
-            )
+            result = await session.call_tool("retrieve_relevant_memories", {"query": query})
 
             # Check response
             response_text = result.content[0].text
             assert isinstance(response_text, str)
-            assert (
-                "Alice" in response_text
-                or "Bob" in response_text
-                or "TechCorp" in response_text
-            )
+            assert "Alice" in response_text or "Bob" in response_text or "TechCorp" in response_text
 
 
 @pytest.mark.asyncio
@@ -114,9 +106,7 @@ async def test_retrieve_memories_empty_storage(temp_storage_dir):
 
             # Try to retrieve memories without adding any
             query = "test query"
-            result = await session.call_tool(
-                "retrieve_relevant_memories", {"query": query}
-            )
+            result = await session.call_tool("retrieve_relevant_memories", {"query": query})
 
             # Check response
             response_text = result.content[0].text
@@ -159,16 +149,12 @@ async def test_visualize_memories_tool(temp_storage_dir):
             await session.initialize()
 
             # First add some memories
-            text = (
-                "Apple Inc. is a technology company. Tim Cook is the CEO of Apple Inc."
-            )
+            text = "Apple Inc. is a technology company. Tim Cook is the CEO of Apple Inc."
             await session.call_tool("add_memories", {"text": text})
 
             # Generate visualization
             output_filename = os.path.join(temp_storage_dir, "test_visualization.html")
-            result = await session.call_tool(
-                "visualize_memories", {"output_filename": output_filename}
-            )
+            result = await session.call_tool("visualize_memories", {"output_filename": output_filename})
 
             # Check response
             response_text = result.content[0].text
@@ -219,9 +205,7 @@ async def test_memory_persistence(temp_storage_dir):
 
             # Query for previously stored memories
             query = "Netflix"
-            result = await session.call_tool(
-                "retrieve_relevant_memories", {"query": query}
-            )
+            result = await session.call_tool("retrieve_relevant_memories", {"query": query})
 
             response_text = result.content[0].text
             assert "Netflix" in response_text
@@ -259,9 +243,7 @@ async def test_memory_aggregation(temp_storage_dir):
 
             # Query for memories from both batches
             query = "SpaceX"
-            result = await session.call_tool(
-                "retrieve_relevant_memories", {"query": query}
-            )
+            result = await session.call_tool("retrieve_relevant_memories", {"query": query})
             response_text = result.content[0].text
 
             # Should find entities from both batches

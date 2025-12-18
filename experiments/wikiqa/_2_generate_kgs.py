@@ -71,9 +71,7 @@ def clean_rows_article_no_response(split_name: Literal["train", "test", "validat
                         article=article_text,
                         correct_answer=a,
                     )
-                    print(
-                        f"Q: {q} -- A: {a} -- has_answer: {result.does_article_contain_answer}"
-                    )
+                    print(f"Q: {q} -- A: {a} -- has_answer: {result.does_article_contain_answer}")
                     if result.does_article_contain_answer:
                         return row
                 except Exception as e:
@@ -118,14 +116,10 @@ def main(split_name: str):
 
     def process_row(row_data):
         title = row_data["document_title"]
-        article_path = os.path.join(
-            OUTPUT_ARTICLES_DIR, f"{sanitize_filename(title)}.txt"
-        )
+        article_path = os.path.join(OUTPUT_ARTICLES_DIR, f"{sanitize_filename(title)}.txt")
         if os.path.exists(article_path):
             try:
-                output_kg_path = os.path.join(
-                    OUTPUT_KG_DIR, f"{sanitize_filename(title)}.json"
-                )
+                output_kg_path = os.path.join(OUTPUT_KG_DIR, f"{sanitize_filename(title)}.json")
                 if os.path.exists(output_kg_path):
                     print(f"KG already exists for '{title}'")
                     return {"status": "skipped", "title": title}
@@ -171,24 +165,16 @@ def main(split_name: str):
 
     # Save error logs
     if missing_files:
-        missing_files_path = os.path.join(
-            OUTPUT_KG_DIR, f"{split_name}_missing_files.json"
-        )
+        missing_files_path = os.path.join(OUTPUT_KG_DIR, f"{split_name}_missing_files.json")
         with open(missing_files_path, "w") as f:
             json.dump(missing_files, f, indent=4)
-        print(
-            f"Saved {len(missing_files)} missing file records to {missing_files_path}"
-        )
+        print(f"Saved {len(missing_files)} missing file records to {missing_files_path}")
 
     if generation_errors:
-        errors_path = os.path.join(
-            OUTPUT_KG_DIR, f"{split_name}_generation_errors.json"
-        )
+        errors_path = os.path.join(OUTPUT_KG_DIR, f"{split_name}_generation_errors.json")
         with open(errors_path, "w") as f:
             json.dump(generation_errors, f, indent=4)
-        print(
-            f"Saved {len(generation_errors)} generation error records to {errors_path}"
-        )
+        print(f"Saved {len(generation_errors)} generation error records to {errors_path}")
 
 
 def _main():

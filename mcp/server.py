@@ -86,14 +86,10 @@ def load_memory_graph():
                 entities=set(graph_dict.get("entities", [])),
                 relations=set(tuple(rel) for rel in graph_dict.get("relations", [])),
                 edges=set(graph_dict.get("edges", [])),
-                entity_clusters={
-                    k: set(v) for k, v in graph_dict.get("entity_clusters", {}).items()
-                }
+                entity_clusters={k: set(v) for k, v in graph_dict.get("entity_clusters", {}).items()}
                 if graph_dict.get("entity_clusters")
                 else None,
-                edge_clusters={
-                    k: set(v) for k, v in graph_dict.get("edge_clusters", {}).items()
-                }
+                edge_clusters={k: set(v) for k, v in graph_dict.get("edge_clusters", {}).items()}
                 if graph_dict.get("edge_clusters")
                 else None,
             )
@@ -119,9 +115,7 @@ def save_memory_graph():
             "entities": list(memory_graph.entities),
             "relations": list(memory_graph.relations),
             "edges": list(memory_graph.edges),
-            "entity_clusters": {
-                k: list(v) for k, v in memory_graph.entity_clusters.items()
-            }
+            "entity_clusters": {k: list(v) for k, v in memory_graph.entity_clusters.items()}
             if memory_graph.entity_clusters
             else None,
             "edge_clusters": {k: list(v) for k, v in memory_graph.edge_clusters.items()}
@@ -203,14 +197,8 @@ def retrieve_relevant_memories(query: str) -> str:
         # Simple keyword-based retrieval for now
         # Find entities and relations that contain query terms
         query_lower = query.lower()
-        relevant_entities = [
-            e for e in memory_graph.entities if query_lower in e.lower()
-        ]
-        relevant_relations = [
-            r
-            for r in memory_graph.relations
-            if any(query_lower in str(part).lower() for part in r)
-        ]
+        relevant_entities = [e for e in memory_graph.entities if query_lower in e.lower()]
+        relevant_relations = [r for r in memory_graph.relations if any(query_lower in str(part).lower() for part in r)]
 
         if not relevant_entities and not relevant_relations:
             return f"No relevant memories found for query: '{query}'"
@@ -248,9 +236,7 @@ def visualize_memories(output_filename: str = "memory_graph.html") -> str:
     global kg_gen_instance, memory_graph
 
     if memory_graph is None or len(memory_graph.entities) == 0:
-        return (
-            "No memories to visualize. Use add_memories to store some memories first."
-        )
+        return "No memories to visualize. Use add_memories to store some memories first."
 
     try:
         # Create output path

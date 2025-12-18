@@ -100,14 +100,9 @@ def test_server_path_resolution():
                         # Should be converted to absolute path
                         # Use os.path.samefile to handle macOS path resolution differences (/var vs /private/var)
                         assert os.path.isabs(server.storage_path)
-                        assert (
-                            os.path.basename(server.storage_path) == "test_memory.json"
-                        )
+                        assert os.path.basename(server.storage_path) == "test_memory.json"
                         # Check the directory contains the temp directory (handles /var vs /private/var)
-                        assert (
-                            temp_dir in server.storage_path
-                            or os.path.realpath(temp_dir) in server.storage_path
-                        )
+                        assert temp_dir in server.storage_path or os.path.realpath(temp_dir) in server.storage_path
 
                     finally:
                         os.chdir(original_cwd)

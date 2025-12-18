@@ -64,10 +64,7 @@ def process_article(article_data):
 results = []
 with ThreadPoolExecutor(max_workers=16) as executor:
     # Submit all tasks
-    future_to_article = {
-        executor.submit(process_article, article): article
-        for article in articles_to_process
-    }
+    future_to_article = {executor.submit(process_article, article): article for article in articles_to_process}
 
     for future in as_completed(future_to_article):
         result = future.result()

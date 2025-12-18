@@ -144,27 +144,19 @@ def plot_comparison(
 
     # Calculate difference
     differences = [a2 - a1 for a1, a2 in zip(accuracies1, accuracies2)]
-    print(
-        f"\n{folder2_name} vs {folder1_name} - Average difference: {np.mean(differences):.2f}%"
-    )
+    print(f"\n{folder2_name} vs {folder1_name} - Average difference: {np.mean(differences):.2f}%")
     print(f"Better cases in {folder2_name}: {sum(1 for d in differences if d > 0)}")
     print(f"Better cases in {folder1_name}: {sum(1 for d in differences if d < 0)}")
     print(f"Equal cases: {sum(1 for d in differences if d == 0)}")
     print("=" * 60)
 
 
-def plot_all_directories_comparison(
-    results_dict, output_file="comprehensive_comparison.png"
-):
+def plot_all_directories_comparison(results_dict, output_file="comprehensive_comparison.png"):
     """Plot a comprehensive comparison of all directories."""
 
     # Filter out empty results
-    results_dict = {
-        name: data
-        for name, data in results_dict.items()
-        if len(data["accuracies"]) > 0
-    }
-    
+    results_dict = {name: data for name, data in results_dict.items() if len(data["accuracies"]) > 0}
+
     if not results_dict:
         print("Warning: No valid results to plot")
         return
@@ -198,9 +190,7 @@ def plot_all_directories_comparison(
         )
     ax1.set_xlabel("File Index", fontsize=12)
     ax1.set_ylabel("Accuracy (%)", fontsize=12)
-    ax1.set_title(
-        "Accuracy Comparison Across All Experiments", fontsize=14, fontweight="bold"
-    )
+    ax1.set_title("Accuracy Comparison Across All Experiments", fontsize=14, fontweight="bold")
     ax1.legend(bbox_to_anchor=(1.05, 1), loc="upper left", fontsize=9)
     ax1.grid(True, alpha=0.3)
 
@@ -257,9 +247,7 @@ def plot_all_directories_comparison(
     print("\n" + "=" * 80)
     print("COMPREHENSIVE STATISTICS")
     print("=" * 80)
-    print(
-        f"{'Experiment':<40} {'Mean':<10} {'Median':<10} {'Std Dev':<10} {'Min':<10} {'Max':<10}"
-    )
+    print(f"{'Experiment':<40} {'Mean':<10} {'Median':<10} {'Std Dev':<10} {'Min':<10} {'Max':<10}")
     print("-" * 80)
     for name, data in results_dict.items():
         accuracies = data["accuracies"]
@@ -274,9 +262,9 @@ def plot_all_directories_comparison(
 
     # Rank experiments by mean accuracy
     ranked = sorted(
-        results_dict.items(), 
-        key=lambda x: np.mean(x[1]["accuracies"]) if len(x[1]["accuracies"]) > 0 else -1, 
-        reverse=True
+        results_dict.items(),
+        key=lambda x: np.mean(x[1]["accuracies"]) if len(x[1]["accuracies"]) > 0 else -1,
+        reverse=True,
     )
     print("\n" + "=" * 80)
     print("RANKING (by Mean Accuracy)")
@@ -303,9 +291,7 @@ def write_summary_file(results_dict, output_file="results/summary.txt"):
         # Overall statistics
         f.write("OVERALL STATISTICS\n")
         f.write("-" * 100 + "\n")
-        f.write(
-            f"{'Experiment':<45} {'Mean':>10} {'Median':>10} {'Std':>10} {'Min':>10} {'Max':>10}\n"
-        )
+        f.write(f"{'Experiment':<45} {'Mean':>10} {'Median':>10} {'Std':>10} {'Min':>10} {'Max':>10}\n")
         f.write("-" * 100 + "\n")
 
         for name, data in results_dict.items():
@@ -320,14 +306,7 @@ def write_summary_file(results_dict, output_file="results/summary.txt"):
                     f"{np.max(accuracies):>10.2f}\n"
                 )
             else:
-                f.write(
-                    f"{name:<45} "
-                    f"{'N/A':>10} "
-                    f"{'N/A':>10} "
-                    f"{'N/A':>10} "
-                    f"{'N/A':>10} "
-                    f"{'N/A':>10}\n"
-                )
+                f.write(f"{name:<45} {'N/A':>10} {'N/A':>10} {'N/A':>10} {'N/A':>10} {'N/A':>10}\n")
         f.write("-" * 100 + "\n\n")
 
         # Ranking
@@ -361,14 +340,14 @@ def write_summary_file(results_dict, output_file="results/summary.txt"):
 
             # Truncate to same length if needed
             min_len = min(len(accuracies1), len(accuracies2))
-            
+
             # Skip if no data to compare
             if min_len == 0:
                 f.write(f"{name2} vs {name1}\n")
                 f.write("-" * 100 + "\n")
                 f.write("  No data available for comparison\n\n")
                 continue
-            
+
             acc1 = accuracies1[:min_len]
             acc2 = accuracies2[:min_len]
 
@@ -387,12 +366,8 @@ def write_summary_file(results_dict, output_file="results/summary.txt"):
                 f.write(f"({name1} performs BETTER on average)\n")
             else:
                 f.write("(TIE)\n")
-            f.write(
-                f"  {name2} wins: {wins_2}/{min_len} cases ({100 * wins_2 / min_len:.1f}%)\n"
-            )
-            f.write(
-                f"  {name1} wins: {wins_1}/{min_len} cases ({100 * wins_1 / min_len:.1f}%)\n"
-            )
+            f.write(f"  {name2} wins: {wins_2}/{min_len} cases ({100 * wins_2 / min_len:.1f}%)\n")
+            f.write(f"  {name1} wins: {wins_1}/{min_len} cases ({100 * wins_1 / min_len:.1f}%)\n")
             f.write(f"  Ties: {ties}/{min_len} cases ({100 * ties / min_len:.1f}%)\n")
 
             # Find largest wins/losses
@@ -401,12 +376,8 @@ def write_summary_file(results_dict, output_file="results/summary.txt"):
             max_win_2_idx = differences.index(max_win_2)
             max_win_1_idx = differences.index(max_win_1)
 
-            f.write(
-                f"\n  Largest advantage for {name2}: {max_win_2:+.2f}% (file index {max_win_2_idx})\n"
-            )
-            f.write(
-                f"  Largest advantage for {name1}: {max_win_1:+.2f}% (file index {max_win_1_idx})\n"
-            )
+            f.write(f"\n  Largest advantage for {name2}: {max_win_2:+.2f}% (file index {max_win_2_idx})\n")
+            f.write(f"  Largest advantage for {name1}: {max_win_1:+.2f}% (file index {max_win_1_idx})\n")
             f.write("\n")
 
         # Analysis by accuracy ranges
@@ -421,11 +392,7 @@ def write_summary_file(results_dict, output_file="results/summary.txt"):
             for name, data in results_dict.items():
                 accuracies = data["accuracies"]
                 if len(accuracies) > 0:
-                    in_range = [
-                        acc
-                        for acc in accuracies
-                        if low <= acc < high or (high == 100 and acc == 100)
-                    ]
+                    in_range = [acc for acc in accuracies if low <= acc < high or (high == 100 and acc == 100)]
                     count = len(in_range)
                     percentage = 100 * count / len(accuracies)
                     f.write(f"  {name:<60} {count:>4} cases ({percentage:>5.1f}%)\n")
@@ -440,7 +407,7 @@ def write_summary_file(results_dict, output_file="results/summary.txt"):
 
         # Filter out empty results for insights
         valid_ranked = [(name, data) for name, data in ranked if len(data["accuracies"]) > 0]
-        
+
         if len(valid_ranked) >= 2:
             best_model = valid_ranked[0][0]
             worst_model = valid_ranked[-1][0]
@@ -449,9 +416,7 @@ def write_summary_file(results_dict, output_file="results/summary.txt"):
 
             f.write(f"1. BEST PERFORMER: {best_model}\n")
             f.write(f"   - Mean accuracy: {best_mean:.2f}%\n")
-            f.write(
-                f"   - Outperforms others by {best_mean - worst_mean:.2f}% on average\n\n"
-            )
+            f.write(f"   - Outperforms others by {best_mean - worst_mean:.2f}% on average\n\n")
 
             f.write(f"2. LOWEST PERFORMER: {worst_model}\n")
             f.write(f"   - Mean accuracy: {worst_mean:.2f}%\n\n")
@@ -468,18 +433,12 @@ def write_summary_file(results_dict, output_file="results/summary.txt"):
             best_model = valid_ranked[0][0]
             if "minimal" in best_model.lower():
                 f.write("3. ⚠️  UNEXPECTED FINDING:\n")
-                f.write(
-                    "   The 'minimal' configuration outperforms configurations with more reasoning.\n"
-                )
+                f.write("   The 'minimal' configuration outperforms configurations with more reasoning.\n")
                 f.write("   This suggests:\n")
-                f.write(
-                    "   - More reasoning tokens may introduce noise or hallucinations\n"
-                )
+                f.write("   - More reasoning tokens may introduce noise or hallucinations\n")
                 f.write("   - The task may benefit from concise, focused retrieval\n")
                 f.write("   - Over-reasoning might dilute the key information\n")
-                f.write(
-                    "   - The embedding/retrieval system may work better with simpler representations\n\n"
-                )
+                f.write("   - The embedding/retrieval system may work better with simpler representations\n\n")
 
         # Consistency analysis
         f.write("4. CONSISTENCY ANALYSIS:\n")
@@ -520,12 +479,12 @@ def compare_all_pairs(results_dict, output_dir="pairwise_comparisons"):
 
         accuracies1 = data1["accuracies"]
         accuracies2 = data2["accuracies"]
-        
+
         # Skip if either dataset is empty
         if len(accuracies1) == 0 or len(accuracies2) == 0:
             print(f"  Skipping {name1} vs {name2}: Empty dataset")
             continue
-        
+
         file_paths1 = data1["file_paths"]
         file_paths2 = data2["file_paths"]
 
@@ -604,9 +563,7 @@ def main():
             print(f"  ✗ Warning: Could not read from {directory}: {e}")
 
     if len(results_dict) < 2:
-        print(
-            f"\n✗ Error: Need at least 2 valid directories to compare. Found {len(results_dict)}."
-        )
+        print(f"\n✗ Error: Need at least 2 valid directories to compare. Found {len(results_dict)}.")
         return 1
 
     print("\n" + "=" * 80)

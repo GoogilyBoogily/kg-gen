@@ -47,9 +47,7 @@ def test_memory_file_creation_and_loading():
                 assert success, "Memory graph should save successfully"
 
                 # Verify file was created
-                assert os.path.exists(storage_path), (
-                    f"Memory file should be created at {storage_path}"
-                )
+                assert os.path.exists(storage_path), f"Memory file should be created at {storage_path}"
 
                 # Verify file contents
                 with open(storage_path, "r") as f:
@@ -60,9 +58,7 @@ def test_memory_file_creation_and_loading():
                 assert "edges" in saved_data
                 assert "Harry Potter" in saved_data["entities"]
                 assert "Hogwarts" in saved_data["entities"]
-                assert ["Harry Potter", "attends", "Hogwarts"] in saved_data[
-                    "relations"
-                ]
+                assert ["Harry Potter", "attends", "Hogwarts"] in saved_data["relations"]
 
                 # Test loading
                 server.memory_graph = None  # Reset
@@ -113,9 +109,7 @@ def test_memory_file_clearing_on_startup():
             mock_kg_gen.return_value = mock_instance
 
             # Test with clearing enabled
-            with patch.dict(
-                os.environ, {"KG_STORAGE_PATH": storage_path, "KG_CLEAR_MEMORY": "true"}
-            ):
+            with patch.dict(os.environ, {"KG_STORAGE_PATH": storage_path, "KG_CLEAR_MEMORY": "true"}):
                 # Reset globals
                 original_storage = server.storage_path
                 original_graph = server.memory_graph
@@ -125,9 +119,7 @@ def test_memory_file_clearing_on_startup():
                     server.initialize_kg_gen()
 
                     # File should be deleted
-                    assert not os.path.exists(storage_path), (
-                        "Memory file should be cleared on startup"
-                    )
+                    assert not os.path.exists(storage_path), "Memory file should be cleared on startup"
 
                 finally:
                     # Restore globals
@@ -180,9 +172,7 @@ def test_memory_file_preservation_without_clearing():
                     server.initialize_kg_gen()
 
                     # File should still exist
-                    assert os.path.exists(storage_path), (
-                        "Memory file should be preserved when not clearing"
-                    )
+                    assert os.path.exists(storage_path), "Memory file should be preserved when not clearing"
 
                     # Memory should be loaded
                     assert server.memory_graph is not None

@@ -101,9 +101,7 @@ def _build_view_model(graph: Graph) -> dict[str, Any]:
 
     adjacency: dict[str, set[str]] = defaultdict(set)
     node_neighbors: dict[str, set[str]] = defaultdict(set)
-    node_edges: dict[str, dict[str, list[str]]] = defaultdict(
-        lambda: {"incoming": [], "outgoing": []}
-    )
+    node_edges: dict[str, dict[str, list[str]]] = defaultdict(lambda: {"incoming": [], "outgoing": []})
 
     edges_view: list[dict[str, Any]] = []
 
@@ -223,14 +221,8 @@ def _build_view_model(graph: Graph) -> dict[str, Any]:
         "edgeClusters": len(edge_cluster_view),
         "isolatedEntities": len(isolated_entities),
         "components": len(components),
-        "averageDegree": round(
-            sum(degree[entity] for entity in entities) / len(entities), 2
-        )
-        if entities
-        else 0,
-        "density": round(len(edges_view) / (len(entities) * (len(entities) - 1)), 3)
-        if len(entities) > 1
-        else 0,
+        "averageDegree": round(sum(degree[entity] for entity in entities) / len(entities), 2) if entities else 0,
+        "density": round(len(edges_view) / (len(entities) * (len(entities) - 1)), 3) if len(entities) > 1 else 0,
     }
 
     relation_records = [

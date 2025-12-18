@@ -35,18 +35,14 @@ class LLMDeduplicate:
         self.lm = lm
 
         # Embeddings and BM25 tokens for nodes
-        self.node_embeddings = retrieval_model.encode(
-            self.nodes, show_progress_bar=True
-        )
+        self.node_embeddings = retrieval_model.encode(self.nodes, show_progress_bar=True)
         self.node_bm25_tokenized = [text.lower().split() for text in self.nodes]
 
         # Always rebuild BM25 from tokens (it's fast and simpler than serializing the object)
         self.node_bm25 = BM25Okapi(self.node_bm25_tokenized)
 
         # Embeddings and BM25 tokens for edges
-        self.edge_embeddings = retrieval_model.encode(
-            self.edges, show_progress_bar=True
-        )
+        self.edge_embeddings = retrieval_model.encode(self.edges, show_progress_bar=True)
         self.edge_bm25_tokenized = [text.lower().split() for text in self.edges]
 
         # Always rebuild BM25 from tokens
@@ -54,9 +50,7 @@ class LLMDeduplicate:
 
         dspy.configure(lm=lm)
 
-    def get_relevant_items(
-        self, query: str, top_k: int = 50, type: str = "node"
-    ) -> list[str]:
+    def get_relevant_items(self, query: str, top_k: int = 50, type: str = "node") -> list[str]:
         """
         Use rank fusion of BM25 + embedding to retrieve top-k nodes.
         """
@@ -64,9 +58,7 @@ class LLMDeduplicate:
 
         # BM25
         bm25_scores = (
-            self.node_bm25.get_scores(query_tokens)
-            if type == "node"
-            else self.edge_bm25.get_scores(query_tokens)
+            self.node_bm25.get_scores(query_tokens) if type == "node" else self.edge_bm25.get_scores(query_tokens)
         )
 
         # Embedding
@@ -125,9 +117,7 @@ class LLMDeduplicate:
 
             # Add unassigned items as their own cluster if any exist
             if len(unassigned) > 0:
-                self.logger.debug(
-                    "Adding %s unassigned items as a separate cluster", len(unassigned)
-                )
+                self.logger.debug("Adding %s unassigned items as a separate cluster", len(unassigned))
                 clusters.append(unassigned.tolist())
             else:
                 self.logger.debug("No unassigned items to add as a cluster")
@@ -148,28 +138,18 @@ class LLMDeduplicate:
             # Convert clusters to JSON-serializable format - save names instead of indices
             if cluster_type == "node":
                 self.logger.debug("Converting node indices to node names...")
-                clusters_data = [
-                    [self.nodes[idx] for idx in cluster] for cluster in clusters
-                ]
-                self.logger.debug(
-                    "Sample of first cluster after conversion: %s", clusters_data[0][:3]
-                )
+                clusters_data = [[self.nodes[idx] for idx in cluster] for cluster in clusters]
+                self.logger.debug("Sample of first cluster after conversion: %s", clusters_data[0][:3])
                 # Add node clusters to self
                 self.node_clusters = clusters_data
             else:  # edge
                 self.logger.debug("Processing edge clusters...")
-                clusters_data = [
-                    [self.edges[idx] for idx in cluster] for cluster in clusters
-                ]
-                self.logger.debug(
-                    "Edge clusters data is empty: %s", len(clusters_data) == 0
-                )
+                clusters_data = [[self.edges[idx] for idx in cluster] for cluster in clusters]
+                self.logger.debug("Edge clusters data is empty: %s", len(clusters_data) == 0)
                 # Add edge clusters to self
                 self.edge_clusters = clusters_data
 
-    def deduplicate_cluster(
-        self, cluster: list[str], type: str = "node"
-    ) -> tuple[set, dict[str, list[str]]]:
+    def deduplicate_cluster(self, cluster: list[str], type: str = "node") -> tuple[set, dict[str, list[str]]]:
         cluster = cluster.copy()
 
         items = set()
@@ -177,9 +157,7 @@ class LLMDeduplicate:
         plural_type = "entities" if type == "node" else "edges"
         singular_type = "entity" if type == "node" else "edge"
 
-        self.logger.info(
-            "Starting deduplication of %s %s in cluster", len(cluster), plural_type
-        )
+        self.logger.info("Starting deduplication of %s %s in cluster", len(cluster), plural_type)
 
         processed_count = 0
         while len(cluster) > 0:
@@ -214,9 +192,7 @@ class LLMDeduplicate:
                 """
                 item: str = dspy.InputField()
                 set: list[str] = dspy.InputField()
-                duplicates: list[str] = dspy.OutputField(
-                    description="Exact matches to items in {plural_type} set"
-                )
+                duplicates: list[str] = dspy.OutputField(description="Exact matches to items in {plural_type} set")
                 alias: str = dspy.OutputField(
                     description=f"Best {singular_type} name to represent the duplicates, ideally from the {plural_type} set"
                 )
@@ -230,9 +206,7 @@ class LLMDeduplicate:
             duplicates = [dup for dup in result.duplicates if dup in cluster]
 
             if len(duplicates) > 0:
-                self.logger.debug(
-                    "  ✓ Found %s duplicates for '%s'", len(duplicates), item
-                )
+                self.logger.debug("  ✓ Found %s duplicates for '%s'", len(duplicates), item)
                 self.logger.info(
                     "  → Using alias '%s' to represent: '%s' and %s",
                     result.alias,
@@ -244,9 +218,7 @@ class LLMDeduplicate:
                     cluster.remove(duplicate)
                     item_clusters[result.alias].add(duplicate)
             else:
-                self.logger.debug(
-                    "  ✗ No duplicates found for '%s', keeping as is", item
-                )
+                self.logger.debug("  ✗ No duplicates found for '%s', keeping as is", item)
                 item_clusters[item] = {item}
 
         self.logger.debug(

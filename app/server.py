@@ -16,9 +16,7 @@ from src.kg_gen.models import Graph
 from src.kg_gen.utils.visualize_kg import _build_view_model
 
 APP_DIR = Path(__file__).resolve().parent
-TEMPLATE_PATH = (
-    APP_DIR.parent / "src" / "kg_gen" / "utils" / "template.html"
-).resolve()
+TEMPLATE_PATH = (APP_DIR.parent / "src" / "kg_gen" / "utils" / "template.html").resolve()
 DATA_ROOT = (APP_DIR.parent / "app" / "examples").resolve()
 
 
@@ -43,14 +41,10 @@ for file in DATA_ROOT.glob("*.json"):
     )
 
 
-EXAMPLE_INDEX = {
-    example.slug: example for example in EXAMPLE_GRAPHS if example.path.exists()
-}
+EXAMPLE_INDEX = {example.slug: example for example in EXAMPLE_GRAPHS if example.path.exists()}
 
 if len(EXAMPLE_INDEX) < len(EXAMPLE_GRAPHS):
-    missing = [
-        example.slug for example in EXAMPLE_GRAPHS if example.slug not in EXAMPLE_INDEX
-    ]
+    missing = [example.slug for example in EXAMPLE_GRAPHS if example.slug not in EXAMPLE_INDEX]
     logger = logging.getLogger("kg_gen_app")
     logger.warning("Example graphs missing on disk: %s", ", ".join(missing))
 
@@ -97,9 +91,7 @@ async def list_examples() -> JSONResponse:
     logger.debug("Listing built-in example graphs")
     items = [
         {"slug": example.slug, "title": example.title, "wiki_url": example.wiki_url}
-        for example in sorted(
-            EXAMPLE_INDEX.values(), key=lambda item: item.title.lower()
-        )
+        for example in sorted(EXAMPLE_INDEX.values(), key=lambda item: item.title.lower())
     ]
     return JSONResponse(items)
 
@@ -118,9 +110,7 @@ async def load_example(slug: str) -> JSONResponse:
         payload = json.loads(example.path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         logger.exception("Failed to parse example graph %s", slug)
-        raise HTTPException(
-            status_code=500, detail=f"Example '{slug}' is invalid: {exc}"
-        )
+        raise HTTPException(status_code=500, detail=f"Example '{slug}' is invalid: {exc}")
 
     logger.info("Loaded example graph '%s' from %s", slug, example.path)
     return JSONResponse(payload)
@@ -139,9 +129,7 @@ async def build_view(graph: Graph) -> JSONResponse:
     except Exception as exc:  # pragma: no cover - defensive
         logger.exception("Failed to build view model")
         raise HTTPException(status_code=500, detail=f"Failed to build view: {exc}")
-    logger.info(
-        "View model ready: nodes=%s edges=%s", len(view["nodes"]), len(view["edges"])
-    )
+    logger.info("View model ready: nodes=%s edges=%s", len(view["nodes"]), len(view["edges"]))
     return JSONResponse({"view": view, "graph": graph.model_dump(mode="json")})
 
 
@@ -181,24 +169,18 @@ async def generate_graph(
             contents = await text_file.read()
         except Exception as exc:  # pragma: no cover - defensive
             logger.exception("Failed to read uploaded text file")
-            raise HTTPException(
-                status_code=400, detail=f"Reading text file failed: {exc}"
-            )
+            raise HTTPException(status_code=400, detail=f"Reading text file failed: {exc}")
         try:
             decoded = contents.decode("utf-8")
         except UnicodeDecodeError as exc:
             logger.exception("Uploaded text file must be UTF-8")
-            raise HTTPException(
-                status_code=400, detail=f"Text file must be UTF-8: {exc}"
-            )
+            raise HTTPException(status_code=400, detail=f"Text file must be UTF-8: {exc}")
         cleaned_file_text = _clean_str(decoded)
         if cleaned_file_text:
             text_fragments.append(cleaned_file_text)
 
     if not text_fragments:
-        raise HTTPException(
-            status_code=400, detail="Provide inline text or upload a .txt file"
-        )
+        raise HTTPException(status_code=400, detail="Provide inline text or upload a .txt file")
 
     request_text = "\n\n".join(text_fragments)
 
@@ -208,9 +190,7 @@ async def generate_graph(
             numeric_chunk = int(chunk_size)
         except ValueError as exc:
             logger.warning("Invalid chunk_size received: %s", chunk_size)
-            raise HTTPException(
-                status_code=400, detail=f"chunk_size must be an integer: {exc}"
-            )
+            raise HTTPException(status_code=400, detail=f"chunk_size must be an integer: {exc}")
         if numeric_chunk <= 0:
             numeric_chunk = None
 
@@ -220,9 +200,7 @@ async def generate_graph(
             numeric_temperature = float(temperature)
         except ValueError as exc:
             logger.warning("Invalid temperature received: %s", temperature)
-            raise HTTPException(
-                status_code=400, detail=f"temperature must be numeric: {exc}"
-            )
+            raise HTTPException(status_code=400, detail=f"temperature must be numeric: {exc}")
 
     # Validate temperature for gpt-5 family models
     if "gpt-5" in model:

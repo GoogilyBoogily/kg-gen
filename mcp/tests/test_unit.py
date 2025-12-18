@@ -74,9 +74,7 @@ class TestInitializeKGGen:
         result = initialize_kg_gen()
 
         # Verify KGGen was called with correct parameters
-        mock_kg_gen.assert_called_once_with(
-            model="test-model", temperature=0.0, api_key="test-key"
-        )
+        mock_kg_gen.assert_called_once_with(model="test-model", temperature=0.0, api_key="test-key")
 
         # Verify load_memory_graph was called
         mock_load.assert_called_once()
@@ -94,9 +92,7 @@ class TestInitializeKGGen:
         result = initialize_kg_gen()
 
         # Verify KGGen was called with defaults
-        mock_kg_gen.assert_called_once_with(
-            model="openai/gpt-4o", temperature=0.0, api_key=None
-        )
+        mock_kg_gen.assert_called_once_with(model="openai/gpt-4o", temperature=0.0, api_key=None)
 
         mock_load.assert_called_once()
         assert result == mock_instance
@@ -124,9 +120,7 @@ class TestLoadMemoryGraph:
                 call_args = mock_graph.call_args[1]
 
                 assert call_args["entities"] == set(sample_graph_data["entities"])
-                assert call_args["relations"] == {
-                    tuple(rel) for rel in sample_graph_data["relations"]
-                }
+                assert call_args["relations"] == {tuple(rel) for rel in sample_graph_data["relations"]}
                 assert call_args["edges"] == set(sample_graph_data["edges"])
 
     def test_load_nonexistent_file(self, temp_storage_file):
@@ -143,9 +137,7 @@ class TestLoadMemoryGraph:
                 load_memory_graph()
 
                 # Verify empty Graph was created
-                mock_graph.assert_called_once_with(
-                    entities=set(), relations=set(), edges=set()
-                )
+                mock_graph.assert_called_once_with(entities=set(), relations=set(), edges=set())
 
     def test_load_corrupted_file(self, temp_storage_file):
         """Test loading when storage file is corrupted."""
@@ -161,9 +153,7 @@ class TestLoadMemoryGraph:
                 load_memory_graph()
 
                 # Should create empty graph on error
-                mock_graph.assert_called_once_with(
-                    entities=set(), relations=set(), edges=set()
-                )
+                mock_graph.assert_called_once_with(entities=set(), relations=set(), edges=set())
 
 
 class TestSaveMemoryGraph:
@@ -276,9 +266,7 @@ class TestEnvironmentHandling:
                     initialize_kg_gen()
 
                     # Should use OPENAI_API_KEY as fallback
-                    mock_kg_gen.assert_called_once_with(
-                        model="test-model", temperature=0.0, api_key="openai-key"
-                    )
+                    mock_kg_gen.assert_called_once_with(model="test-model", temperature=0.0, api_key="openai-key")
 
     def test_kg_api_key_priority(self):
         """Test that KG_API_KEY takes priority over OPENAI_API_KEY."""
@@ -294,6 +282,4 @@ class TestEnvironmentHandling:
                     initialize_kg_gen()
 
                     # Should use KG_API_KEY
-                    mock_kg_gen.assert_called_once_with(
-                        model="test-model", temperature=0.0, api_key="kg-key"
-                    )
+                    mock_kg_gen.assert_called_once_with(model="test-model", temperature=0.0, api_key="kg-key")

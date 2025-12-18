@@ -74,12 +74,8 @@ def main(
     llm_deduplicated_graph2.stats("LLM deduplicated deduplicated graph")
 
     logger.info("Semantic hashing time: %s seconds", semhash_time)
-    logger.info(
-        "LLM time: %s seconds, cluster time: %s seconds", llm_time, cluster_time
-    )
-    logger.info(
-        "LLM time2: %s seconds, cluster time2: %s seconds", llm_time2, cluster_time2
-    )
+    logger.info("LLM time: %s seconds, cluster time: %s seconds", llm_time, cluster_time)
+    logger.info("LLM time2: %s seconds, cluster time2: %s seconds", llm_time2, cluster_time2)
 
 
 if __name__ == "__main__":

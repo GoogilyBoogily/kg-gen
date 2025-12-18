@@ -27,17 +27,13 @@ def test_chunked(kg: KGGen):
 
     # Compare differences
     print("\nDifferences between chunked and non-chunked graph generation:")
-    print(
-        "Entities found only in chunked graph:", graph_chunked.entities - graph.entities
-    )
+    print("Entities found only in chunked graph:", graph_chunked.entities - graph.entities)
     print(
         "Entities found only in non-chunked graph:",
         graph.entities - graph_chunked.entities,
     )
     print("Edge types found only in chunked graph:", graph_chunked.edges - graph.edges)
-    print(
-        "Edge types found only in non-chunked graph:", graph.edges - graph_chunked.edges
-    )
+    print("Edge types found only in non-chunked graph:", graph.edges - graph_chunked.edges)
     print(
         "Relationships found only in chunked graph:",
         graph_chunked.relations - graph.relations,

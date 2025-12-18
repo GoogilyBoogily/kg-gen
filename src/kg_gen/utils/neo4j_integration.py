@@ -40,9 +40,7 @@ class Neo4jUploader:
             bool: True if connection successful, False otherwise
         """
         try:
-            self.driver = GraphDatabase.driver(
-                self.uri, auth=(self.username, self.password)
-            )
+            self.driver = GraphDatabase.driver(self.uri, auth=(self.username, self.password))
             # Test the connection
             with self.driver.session(database=self.database) as session:
                 session.run("RETURN 1")
@@ -89,16 +87,12 @@ class Neo4jUploader:
                     logger.info("Cleared existing graph data")
 
                 # Create nodes
-                node_count = self._create_nodes(
-                    session, graph, graph_name, add_properties
-                )
+                node_count = self._create_nodes(session, graph, graph_name, add_properties)
 
                 # Create relationships
                 rel_count = self._create_relationships(session, graph, graph_name)
 
-                logger.info(
-                    f"Successfully uploaded graph: {node_count} nodes, {rel_count} relationships"
-                )
+                logger.info(f"Successfully uploaded graph: {node_count} nodes, {rel_count} relationships")
                 return True
 
         except Exception as e:
@@ -132,14 +126,10 @@ class Neo4jUploader:
         SET n += $properties
         """
 
-        result = session.run(
-            query, entities=list(graph.entities), properties=properties
-        )
+        result = session.run(query, entities=list(graph.entities), properties=properties)
         return len(list(result))
 
-    def _create_relationships(
-        self, session, graph: Graph, graph_name: Optional[str] = None
-    ) -> int:
+    def _create_relationships(self, session, graph: Graph, graph_name: Optional[str] = None) -> int:
         """Create relationships in Neo4j from graph relations."""
         rel_count = 0
 
@@ -169,9 +159,7 @@ class Neo4jUploader:
 
         return rel_count
 
-    def query_graph(
-        self, cypher_query: str, parameters: Optional[Dict[str, Any]] = None
-    ) -> List[Dict[str, Any]]:
+    def query_graph(self, cypher_query: str, parameters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """
         Execute a Cypher query on the Neo4j database.
 
@@ -241,9 +229,7 @@ def upload_to_neo4j(
 
     try:
         if uploader.connect():
-            success = uploader.upload_graph(
-                graph, graph_name, clear_existing, add_properties
-            )
+            success = uploader.upload_graph(graph, graph_name, clear_existing, add_properties)
             return success
         return False
     finally:

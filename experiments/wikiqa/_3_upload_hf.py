@@ -194,9 +194,7 @@ If you use this dataset in your research, please cite:
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Upload WikiQA dataset to HuggingFace Hub"
-    )
+    parser = argparse.ArgumentParser(description="Upload WikiQA dataset to HuggingFace Hub")
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -215,6 +213,4 @@ if __name__ == "__main__":
         print("Cannot use --yes with --dry-run")
         sys.exit(1)
 
-    upload_wikiqa_dataset(
-        dry_run=args.dry_run, skip_confirm=args.yes, api_key=args.api_key
-    )
+    upload_wikiqa_dataset(dry_run=args.dry_run, skip_confirm=args.yes, api_key=args.api_key)

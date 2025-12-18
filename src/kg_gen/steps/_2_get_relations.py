@@ -3,9 +3,7 @@ import dspy
 from pydantic import BaseModel
 
 
-def extraction_sig(
-    Relation: BaseModel, is_conversation: bool, context: str = ""
-) -> dspy.Signature:
+def extraction_sig(Relation: BaseModel, is_conversation: bool, context: str = "") -> dspy.Signature:
     if not is_conversation:
 
         class ExtractTextRelations(dspy.Signature):
@@ -15,9 +13,7 @@ def extraction_sig(
 
             source_text: str = dspy.InputField()
             entities: list[str] = dspy.InputField()
-            relations: list[Relation] = dspy.OutputField(
-                desc="List of subject-predicate-object tuples. Be thorough."
-            )
+            relations: list[Relation] = dspy.OutputField(desc="List of subject-predicate-object tuples. Be thorough.")
 
         return ExtractTextRelations
     else:
@@ -39,9 +35,7 @@ def extraction_sig(
         return ExtractConversationRelations
 
 
-def fallback_extraction_sig(
-    entities, is_conversation, context: str = ""
-) -> dspy.Signature:
+def fallback_extraction_sig(entities, is_conversation, context: str = "") -> dspy.Signature:
     """This fallback extraction does not strictly type the subject and object strings."""
 
     entities_str = "\n- ".join(entities)
@@ -79,9 +73,7 @@ def get_relations(
 
     except Exception as _:
         # print("get_relations: fallback extraction")
-        Relation, ExtractRelations = fallback_extraction_sig(
-            entities, is_conversation, context
-        )
+        Relation, ExtractRelations = fallback_extraction_sig(entities, is_conversation, context)
         extract = dspy.Predict(ExtractRelations)
         result = extract(source_text=input_data, entities=entities)
 
@@ -95,9 +87,7 @@ def get_relations(
 
         fix = dspy.ChainOfThought(FixedRelations)
 
-        fix_res = fix(
-            source_text=input_data, entities=entities, relations=result.relations
-        )
+        fix_res = fix(source_text=input_data, entities=entities, relations=result.relations)
 
         good_relations = []
         for rel in fix_res.fixed_relations:

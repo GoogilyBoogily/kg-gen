@@ -84,9 +84,7 @@ def test_multiple_models(kg: KGGen):
     for config in model_configs:
         print(f"\nTesting with model: {config['model']}")
         try:
-            graph = kg.generate(
-                input_data=text, model=config["model"], api_key=config["api_key"]
-            )
+            graph = kg.generate(input_data=text, model=config["model"], api_key=config["api_key"])
             print(graph)
         except Exception as e:
             print(f"Error with {config['model']}: {str(e)}")

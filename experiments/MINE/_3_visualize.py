@@ -24,9 +24,7 @@ def ensure_results_exist():
     # Check if results directory exists and has content
     if RESULTS_DIR.exists():
         # Check if directory has any subdirectories (model results)
-        subdirs = [
-            d for d in RESULTS_DIR.iterdir() if d.is_dir() and d.name != "comparisons"
-        ]
+        subdirs = [d for d in RESULTS_DIR.iterdir() if d.is_dir() and d.name != "comparisons"]
         if subdirs:
             return  # Results already exist
 
@@ -103,11 +101,7 @@ def load_all_results(results_folder=None):
                     data = json.load(f)
                     # Remove accuracy summary if present
                     if isinstance(data, list) and len(data) > 0:
-                        if (
-                            isinstance(data[-1], dict)
-                            and "accuracy" in data[-1]
-                            and len(data[-1]) == 1
-                        ):
+                        if isinstance(data[-1], dict) and "accuracy" in data[-1] and len(data[-1]) == 1:
                             data = data[:-1]
                     model_results[idx] = data
             except Exception as e:
@@ -136,7 +130,7 @@ def visualize_kg_in_browser(graph: Graph, model_name: str, essay_idx: int):
     if graph is None or not graph.entities:
         st.warning(f"No knowledge graph available for {model_name}")
         return
-    
+
     # Generate HTML visualization with a descriptive filename
     output_dir = RESULTS_DIR / model_name
     output_path = output_dir / f"kg_{essay_idx}_visualization.html"
@@ -201,9 +195,7 @@ def main():
     st.subheader(f"Essay Topic: {essay_data.get('essay_topic', 'Unknown')}")
 
     # Show which selected models have data for this essay
-    models_without_data = [
-        name for name in selected_models if essay_idx not in all_results.get(name, {})
-    ]
+    models_without_data = [name for name in selected_models if essay_idx not in all_results.get(name, {})]
 
     if models_without_data:
         st.info(
@@ -269,14 +261,10 @@ def main():
                 with st.spinner(f"Loading knowledge graph for {selected_kg_model}..."):
                     graph = load_kg_file(selected_kg_model, essay_idx)
                     if graph:
-                        st.caption(
-                            f"Entities: {len(graph.entities)} | Relations: {len(graph.relations)}"
-                        )
+                        st.caption(f"Entities: {len(graph.entities)} | Relations: {len(graph.relations)}")
                         visualize_kg_in_browser(graph, selected_kg_model, essay_idx)
                     else:
-                        st.error(
-                            f"Failed to load knowledge graph for {selected_kg_model}"
-                        )
+                        st.error(f"Failed to load knowledge graph for {selected_kg_model}")
     else:
         st.info("No knowledge graph files available for the selected models and essay.")
 

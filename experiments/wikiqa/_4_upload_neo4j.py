@@ -53,9 +53,7 @@ def load_graph_from_file(file_path: str) -> Graph:
 
     # Optional clusters
     if data.get("entity_clusters"):
-        data["entity_clusters"] = {
-            k: set(v) for k, v in data["entity_clusters"].items()
-        }
+        data["entity_clusters"] = {k: set(v) for k, v in data["entity_clusters"].items()}
     if data.get("edge_clusters"):
         data["edge_clusters"] = {k: set(v) for k, v in data["edge_clusters"].items()}
 
@@ -65,16 +63,12 @@ def load_graph_from_file(file_path: str) -> Graph:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Upload a graph.json to Neo4j")
     parser.add_argument("--graph-file", required=True, help="Path to graph.json")
-    parser.add_argument(
-        "--uri", required=True, help="Neo4j URI (bolt://... or neo4j+s://...)"
-    )
+    parser.add_argument("--uri", required=True, help="Neo4j URI (bolt://... or neo4j+s://...)")
     parser.add_argument("--username", required=True, help="Neo4j username")
     parser.add_argument("--password", required=True, help="Neo4j password")
     parser.add_argument("--database", default="neo4j", help="Neo4j database name")
     parser.add_argument("--graph-name", help="Optional graph name label/property")
-    parser.add_argument(
-        "--clear-existing", action="store_true", help="Clear DB before upload"
-    )
+    parser.add_argument("--clear-existing", action="store_true", help="Clear DB before upload")
 
     args = parser.parse_args()
 
@@ -89,9 +83,7 @@ def main() -> int:
         print(f"❌ Failed to load graph: {e}")
         return 1
 
-    print(
-        f"📦 Loaded graph: {len(graph.entities)} entities, {len(graph.relations)} relations"
-    )
+    print(f"📦 Loaded graph: {len(graph.entities)} entities, {len(graph.relations)} relations")
     print(f"🔗 Uploading to Neo4j @ {args.uri} (db={args.database}) ...")
 
     ok = upload_to_neo4j(
@@ -115,10 +107,7 @@ def main() -> int:
         uploader = Neo4jUploader(args.uri, args.username, args.password, args.database)
         if uploader.connect():
             stats = uploader.get_graph_stats()
-            print(
-                f"Stats — nodes: {stats.get('node_count')}, "
-                f"relationships: {stats.get('relationship_count')}"
-            )
+            print(f"Stats — nodes: {stats.get('node_count')}, relationships: {stats.get('relationship_count')}")
             uploader.close()
     except Exception:
         pass
