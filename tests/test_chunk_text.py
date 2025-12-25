@@ -1,4 +1,5 @@
 import unittest
+
 from src.kg_gen.utils.chunk_text import chunk_text
 
 

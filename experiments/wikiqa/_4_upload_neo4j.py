@@ -33,14 +33,14 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from kg_gen.models import Graph  # type: ignore
 from kg_gen.utils.neo4j_integration import (  # type: ignore
-    upload_to_neo4j,
     Neo4jUploader,
+    upload_to_neo4j,
 )
 
 
 def load_graph_from_file(file_path: str) -> Graph:
     """Load a Graph from a JSON file, converting lists to sets."""
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         data = json.load(f)
 
     # Convert lists back to sets expected by Graph model

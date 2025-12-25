@@ -1,16 +1,15 @@
 from __future__ import annotations
+
+import json
+import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
-import json
 
-import logging
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
-
 from src.kg_gen.kg_gen import KGGen
 from src.kg_gen.models import Graph
 from src.kg_gen.utils.visualize_kg import _build_view_model
@@ -133,14 +132,14 @@ async def build_view(graph: Graph) -> JSONResponse:
     return JSONResponse({"view": view, "graph": graph.model_dump(mode="json")})
 
 
-def _clean_str(value: Optional[str]) -> Optional[str]:
+def _clean_str(value: str | None) -> str | None:
     if value is None:
         return None
     stripped = value.strip()
     return stripped or None
 
 
-def _parse_bool(value: Optional[str]) -> bool:
+def _parse_bool(value: str | None) -> bool:
     if value is None:
         return False
     return value.lower() in {"true", "1", "yes", "on"}
@@ -150,13 +149,13 @@ def _parse_bool(value: Optional[str]) -> bool:
 async def generate_graph(
     api_key: str = Form(..., description="OpenAI API key"),
     model: str = Form("openai/gpt-4o"),
-    context: Optional[str] = Form(None),
-    chunk_size: Optional[str] = Form(None),
-    temperature: Optional[str] = Form(None),
-    cluster: Optional[str] = Form(None),
-    source_text: Optional[str] = Form(None),
-    text_file: Optional[UploadFile] = File(None),
-    retrieval_model: Optional[str] = Form("sentence-transformers/all-mpnet-base-v2"),
+    context: str | None = Form(None),
+    chunk_size: str | None = Form(None),
+    temperature: str | None = Form(None),
+    cluster: str | None = Form(None),
+    source_text: str | None = Form(None),
+    text_file: UploadFile | None = File(None),
+    retrieval_model: str | None = Form("sentence-transformers/all-mpnet-base-v2"),
 ) -> JSONResponse:
     text_fragments: list[str] = []
 
@@ -184,7 +183,7 @@ async def generate_graph(
 
     request_text = "\n\n".join(text_fragments)
 
-    numeric_chunk: Optional[int] = None
+    numeric_chunk: int | None = None
     if chunk_size:
         try:
             numeric_chunk = int(chunk_size)
@@ -194,7 +193,7 @@ async def generate_graph(
         if numeric_chunk <= 0:
             numeric_chunk = None
 
-    numeric_temperature: Optional[float] = None
+    numeric_temperature: float | None = None
     if temperature:
         try:
             numeric_temperature = float(temperature)
@@ -225,7 +224,7 @@ async def generate_graph(
         model,
         _parse_bool(cluster),
         numeric_chunk,
-        len((_clean_str(context) or "")),
+        len(_clean_str(context) or ""),
         len(request_text),
         numeric_temperature,
         retrieval_model,

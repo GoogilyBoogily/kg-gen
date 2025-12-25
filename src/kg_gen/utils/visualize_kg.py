@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import colorsys
 import hashlib
 import json
-from collections import Counter, defaultdict, deque
-from pathlib import Path
-from typing import Any, Iterable
-import colorsys
 import webbrowser
+from collections import Counter, defaultdict, deque
+from collections.abc import Iterable
+from pathlib import Path
+from typing import Any
 
 from kg_gen.models import Graph
 

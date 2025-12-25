@@ -1,5 +1,4 @@
 from src.kg_gen import KGGen
-from fixtures import kg
 
 
 def match_subset(set1: set[str], set2: set[str]) -> bool:

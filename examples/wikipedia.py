@@ -1,8 +1,10 @@
-from datasets import load_dataset
-from kg_gen.kg_gen import KGGen
+import json
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import json
+
+from datasets import load_dataset
+from kg_gen.kg_gen import KGGen
+
 # import mlflow
 
 # First, find 10 articles that meet the criteria

@@ -25,13 +25,11 @@ The server provides tools for agent memory:
 - get_memory_stats: Get statistics about stored memories
 """
 
-import os
 import json
-from typing import Optional
-from pathlib import Path
-from fastmcp import FastMCP
+import os
 
-from kg_gen import KGGen, Graph
+from fastmcp import FastMCP
+from kg_gen import Graph, KGGen
 
 # Global variables
 kg_gen_instance = None
@@ -79,7 +77,7 @@ def load_memory_graph():
 
     if os.path.exists(storage_path):
         try:
-            with open(storage_path, "r") as f:
+            with open(storage_path) as f:
                 graph_dict = json.load(f)
 
             memory_graph = Graph(
@@ -166,7 +164,7 @@ def add_memories(text: str) -> str:
         # Save to storage
         success = save_memory_graph()
 
-        result = f"Successfully extracted and stored memories from text.\n"
+        result = "Successfully extracted and stored memories from text.\n"
         result += f"New memories: {len(new_graph.entities)} entities, {len(new_graph.relations)} relations\n"
         result += f"Total memories: {len(memory_graph.entities)} entities, {len(memory_graph.relations)} relations\n"
         result += f"Storage: {'Saved successfully' if success else 'Failed to save'}"
@@ -174,7 +172,7 @@ def add_memories(text: str) -> str:
         return result
 
     except Exception as e:
-        return f"Error extracting memories: {str(e)}"
+        return f"Error extracting memories: {e!s}"
 
 
 @mcp.tool
@@ -219,7 +217,7 @@ def retrieve_relevant_memories(query: str) -> str:
         return result
 
     except Exception as e:
-        return f"Error retrieving memories: {str(e)}"
+        return f"Error retrieving memories: {e!s}"
 
 
 @mcp.tool
@@ -248,7 +246,7 @@ def visualize_memories(output_filename: str = "memory_graph.html") -> str:
         return f"Memory graph visualization saved to: {output_path}\n\nVisualization contains {len(memory_graph.entities)} entities and {len(memory_graph.relations)} relations.\nOpen the HTML file in your browser to view the interactive graph."
 
     except Exception as e:
-        return f"Error generating visualization: {str(e)}"
+        return f"Error generating visualization: {e!s}"
 
 
 @mcp.tool

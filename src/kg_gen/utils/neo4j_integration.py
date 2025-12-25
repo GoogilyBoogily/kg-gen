@@ -5,9 +5,11 @@ This module provides functionality to upload generated knowledge graphs
 to Neo4j databases, both local and cloud instances (Neo4j AuraDB).
 """
 
-from typing import Optional, Dict, Any, List
 import logging
-from neo4j import GraphDatabase, Driver
+from typing import Any
+
+from neo4j import Driver, GraphDatabase
+
 from ..models import Graph
 
 logger = logging.getLogger(__name__)
@@ -30,7 +32,7 @@ class Neo4jUploader:
         self.username = username
         self.password = password
         self.database = database
-        self.driver: Optional[Driver] = None
+        self.driver: Driver | None = None
 
     def connect(self) -> bool:
         """
@@ -59,9 +61,9 @@ class Neo4jUploader:
     def upload_graph(
         self,
         graph: Graph,
-        graph_name: Optional[str] = None,
+        graph_name: str | None = None,
         clear_existing: bool = False,
-        add_properties: Optional[Dict[str, Any]] = None,
+        add_properties: dict[str, Any] | None = None,
     ) -> bool:
         """
         Upload a knowledge graph to Neo4j.
@@ -103,8 +105,8 @@ class Neo4jUploader:
         self,
         session,
         graph: Graph,
-        graph_name: Optional[str] = None,
-        add_properties: Optional[Dict[str, Any]] = None,
+        graph_name: str | None = None,
+        add_properties: dict[str, Any] | None = None,
     ) -> int:
         """Create nodes in Neo4j from graph entities."""
         properties = add_properties or {}
@@ -120,16 +122,16 @@ class Neo4jUploader:
 
         label_str = ":".join(labels)
 
-        query = f"""
+        query = """
         UNWIND $entities AS entity
-        MERGE (n:Entity {{name: entity}})
+        MERGE (n:Entity {name: entity})
         SET n += $properties
         """
 
         result = session.run(query, entities=list(graph.entities), properties=properties)
         return len(list(result))
 
-    def _create_relationships(self, session, graph: Graph, graph_name: Optional[str] = None) -> int:
+    def _create_relationships(self, session, graph: Graph, graph_name: str | None = None) -> int:
         """Create relationships in Neo4j from graph relations."""
         rel_count = 0
 
@@ -159,7 +161,7 @@ class Neo4jUploader:
 
         return rel_count
 
-    def query_graph(self, cypher_query: str, parameters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    def query_graph(self, cypher_query: str, parameters: dict[str, Any] | None = None) -> list[dict[str, Any]]:
         """
         Execute a Cypher query on the Neo4j database.
 
@@ -182,7 +184,7 @@ class Neo4jUploader:
             logger.error(f"Query failed: {e}")
             return []
 
-    def get_graph_stats(self) -> Dict[str, int]:
+    def get_graph_stats(self) -> dict[str, int]:
         """Get basic statistics about the uploaded graph."""
         stats_query = """
         MATCH (n)
@@ -205,9 +207,9 @@ def upload_to_neo4j(
     username: str,
     password: str,
     database: str = "neo4j",
-    graph_name: Optional[str] = None,
+    graph_name: str | None = None,
     clear_existing: bool = False,
-    add_properties: Optional[Dict[str, Any]] = None,
+    add_properties: dict[str, Any] | None = None,
 ) -> bool:
     """
     Convenience function to upload a graph to Neo4j.
@@ -239,7 +241,7 @@ def upload_to_neo4j(
 # Example usage and connection configurations
 def get_aura_connection_config(
     instance_id: str, username: str, password: str, region: str = "us-east-1"
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """
     Get connection configuration for Neo4j AuraDB.
 
@@ -261,7 +263,7 @@ def get_local_connection_config(
     port: int = 7687,
     username: str = "neo4j",
     password: str = "password",
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """
     Get connection configuration for local Neo4j instance.
 

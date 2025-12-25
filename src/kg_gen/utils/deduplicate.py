@@ -1,7 +1,8 @@
 import unicodedata
+
+import inflect
 from kg_gen.models import Graph
 from semhash import SemHash
-import inflect
 
 
 class DeduplicateList:
@@ -80,7 +81,7 @@ class DeduplicateList:
             if duplicate.duplicates and len(duplicate.duplicates) > 0 and len(duplicate.duplicates[0]) > 0:
                 duplicate_value = duplicate.duplicates[0][0]
                 self.items_map[original] = self.items_map[duplicate_value]
-                if not original in self.duplicates:
+                if original not in self.duplicates:
                     self.duplicates[original] = duplicate_value
 
         self.deduplicated = deduplication_result.selected

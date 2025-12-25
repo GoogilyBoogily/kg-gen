@@ -1,9 +1,9 @@
-import pandas as pd
 import os
-import wikipediaapi
 import re
-import typer
 
+import pandas as pd
+import typer
+import wikipediaapi
 
 BASE_PATH = "data/wiki_qa"
 OUTPUT_ARTICLES_DIR = f"{BASE_PATH}/articles"

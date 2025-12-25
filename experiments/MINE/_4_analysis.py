@@ -5,28 +5,28 @@ Extracts various graph statistics and correlates them with accuracy scores.
 """
 
 import json
+from collections import Counter
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import seaborn as sns
-from pathlib import Path
-from typing import Dict, List, Tuple
-import networkx as nx
 from scipy import stats
-from collections import Counter
 
 
-def load_kg_from_file(kg_file: Path) -> Dict:
+def load_kg_from_file(kg_file: Path) -> dict:
     """Load a knowledge graph from a JSON file."""
     try:
-        with open(kg_file, "r") as f:
+        with open(kg_file) as f:
             return json.load(f)
     except Exception as e:
         print(f"Warning: Could not load {kg_file}: {e}")
         return None
 
 
-def kg_to_networkx(kg_data: Dict) -> nx.DiGraph:
+def kg_to_networkx(kg_data: dict) -> nx.DiGraph:
     """Convert KG data to NetworkX graph."""
     G = nx.DiGraph()
 
@@ -45,7 +45,7 @@ def kg_to_networkx(kg_data: Dict) -> nx.DiGraph:
     return G
 
 
-def extract_graph_statistics(kg_data: Dict) -> Dict:
+def extract_graph_statistics(kg_data: dict) -> dict:
     """Extract comprehensive statistics from a knowledge graph."""
     if kg_data is None:
         return None
@@ -169,7 +169,7 @@ def extract_graph_statistics(kg_data: Dict) -> Dict:
     return stats_dict
 
 
-def calculate_entropy(counts: List[int]) -> float:
+def calculate_entropy(counts: list[int]) -> float:
     """Calculate Shannon entropy of a distribution."""
     if not counts:
         return 0
@@ -188,7 +188,7 @@ def parse_accuracy(accuracy_str: str) -> float:
 def load_accuracy_from_results(results_file: Path) -> float:
     """Load accuracy from a results JSON file."""
     try:
-        with open(results_file, "r") as f:
+        with open(results_file) as f:
             data = json.load(f)
             if isinstance(data, list) and len(data) > 0:
                 last_item = data[-1]
@@ -199,7 +199,7 @@ def load_accuracy_from_results(results_file: Path) -> float:
     return None
 
 
-def collect_data_for_model(model_dir: Path) -> Tuple[List[Dict], List[float]]:
+def collect_data_for_model(model_dir: Path) -> tuple[list[dict], list[float]]:
     """Collect graph statistics and accuracies for all essays in a model directory."""
     graph_stats = []
     accuracies = []

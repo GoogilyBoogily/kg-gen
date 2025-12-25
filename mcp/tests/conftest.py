@@ -2,10 +2,11 @@
 Pytest configuration and shared fixtures for MCP server tests.
 """
 
-import pytest
 import os
 import tempfile
 from pathlib import Path
+
+import pytest
 from dotenv import load_dotenv
 
 load_dotenv()

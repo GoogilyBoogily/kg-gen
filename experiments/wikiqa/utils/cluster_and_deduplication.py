@@ -1,30 +1,28 @@
-import sys
 import os
+import sys
 
 # Add the project root to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 import json
 import os
-from typing import Tuple
-import networkx as nx
+
 import numpy as np
-from sentence_transformers import SentenceTransformer
-from rank_bm25 import BM25Okapi
-from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
+from rank_bm25 import BM25Okapi
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 
 load_dotenv()
 import logging
-from pathlib import Path
-from src.kg_gen import Graph
-import dspy
-from concurrent.futures import ThreadPoolExecutor
-import faiss
-import numpy as np
-from scipy.spatial.distance import cdist
 import time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
+import dspy
+import faiss
+from scipy.spatial.distance import cdist
+from src.kg_gen import Graph
 
 # Set up logging safely
 logger = logging.getLogger("kg_rag")
@@ -44,7 +42,7 @@ class KGAssistedRAG:
         self.output_folder = output_folder
         load_dotenv()
 
-        with open(kg_path, "r", encoding="utf-8") as f:
+        with open(kg_path, encoding="utf-8") as f:
             kg_data = json.load(f)
 
         self.kg = kg_data
@@ -81,7 +79,7 @@ class KGAssistedRAG:
         # Check if cached BM25 tokens for nodes exist
         if os.path.exists(node_bm25_tokens_cache_path):
             print(f"Loading node BM25 tokens from cache: {node_bm25_tokens_cache_path}")
-            with open(node_bm25_tokens_cache_path, "r") as f:
+            with open(node_bm25_tokens_cache_path) as f:
                 self.node_bm25_tokenized = json.load(f)
         else:
             print("Generating node BM25 tokens...")
@@ -115,7 +113,7 @@ class KGAssistedRAG:
         # Check if cached BM25 tokens for edges exist
         if os.path.exists(edge_bm25_tokens_cache_path):
             print(f"Loading edge BM25 tokens from cache: {edge_bm25_tokens_cache_path}")
-            with open(edge_bm25_tokens_cache_path, "r") as f:
+            with open(edge_bm25_tokens_cache_path) as f:
                 self.edge_bm25_tokenized = json.load(f)
         else:
             print("Generating edge BM25 tokens...")
@@ -164,14 +162,14 @@ class KGAssistedRAG:
                 node_clusters_path = os.path.join(self.output_folder, "node_clusters.json")
                 if os.path.exists(node_clusters_path):
                     print(f"Node clusters already exist at {node_clusters_path}, loading existing clusters")
-                    with open(node_clusters_path, "r") as f:
+                    with open(node_clusters_path) as f:
                         self.node_clusters = json.load(f)
                     continue
             elif embedding_type == "edge":
                 edge_clusters_path = os.path.join(self.output_folder, "edge_clusters.json")
                 if os.path.exists(edge_clusters_path):
                     print(f"Edge clusters already exist at {edge_clusters_path}, loading existing clusters")
-                    with open(edge_clusters_path, "r") as f:
+                    with open(edge_clusters_path) as f:
                         self.edge_clusters = json.load(f)
                     continue
             # Step 1: Cluster centers with FAISS
@@ -309,7 +307,7 @@ class KGAssistedRAG:
         if os.path.exists(progress_path):
             try:
                 print(f"Found existing progress file at {progress_path}. Loading...")
-                with open(progress_path, "r") as f:
+                with open(progress_path) as f:
                     progress = json.load(f)
 
                 entities = set(progress.get("entities", []))
@@ -498,10 +496,10 @@ if __name__ == "__main__":
         nodes = rag.get_relevant_items(test_query, 50, "node")
         edges = rag.get_relevant_items(test_query, 50, "edge")
         print(f"\nQuery: {test_query}")
-        print(f"\nRelevant Nodes:")
+        print("\nRelevant Nodes:")
         for n in nodes:
             print(n)
-        print(f"\nRelevant Edges:")
+        print("\nRelevant Edges:")
         for e in edges:
             print(e)
 

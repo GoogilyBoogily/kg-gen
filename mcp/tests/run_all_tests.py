@@ -5,8 +5,9 @@ This script runs all test files in the tests directory.
 """
 
 import sys
-import pytest
 from pathlib import Path
+
+import pytest
 
 
 def main():

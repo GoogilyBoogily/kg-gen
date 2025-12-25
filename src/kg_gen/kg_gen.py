@@ -1,29 +1,29 @@
-from typing import Union, List, Dict, Optional, Any
-from typing_extensions import deprecated
-
-from kg_gen.steps._1_get_entities import get_entities
-from kg_gen.steps._2_get_relations import get_relations
-from kg_gen.steps._3_deduplicate import run_deduplication, DeduplicateMethod
-from kg_gen.utils.chunk_text import chunk_text
-from kg_gen.utils.visualize_kg import visualize as visualize_kg
-from kg_gen.models import Graph
-from kg_gen.batch import (
-    BatchRequestConfig,
-    build_entity_extraction_requests,
-    build_relation_extraction_requests,
-    build_deduplication_requests,
-)
-import dspy
 import json
-import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import networkx as nx
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 
 # Configure dspy logging to only show errors
 import logging
+import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any
+from warnings import deprecated
+
+import dspy
+import networkx as nx
+import numpy as np
+from kg_gen.batch import (
+    BatchRequestConfig,
+    build_deduplication_requests,
+    build_entity_extraction_requests,
+    build_relation_extraction_requests,
+)
+from kg_gen.models import Graph
+from kg_gen.steps._1_get_entities import get_entities
+from kg_gen.steps._2_get_relations import get_relations
+from kg_gen.steps._3_deduplicate import DeduplicateMethod, run_deduplication
+from kg_gen.utils.chunk_text import chunk_text
+from kg_gen.utils.visualize_kg import visualize as visualize_kg
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ class KGGen:
         reasoning_effort: str = None,
         api_key: str = None,
         api_base: str = None,
-        retrieval_model: Optional[str] = None,
+        retrieval_model: str | None = None,
         disable_cache: bool = False,
     ):
         """Initialize KGGen with optional model configuration
@@ -57,7 +57,7 @@ class KGGen:
         self.temperature = temperature
         self.api_key = api_key
         self.api_base = api_base
-        self.retrieval_model: Optional[SentenceTransformer] = None
+        self.retrieval_model: SentenceTransformer | None = None
         self.lm = None
         self.disable_cache = disable_cache
 
@@ -148,7 +148,7 @@ class KGGen:
 
     @staticmethod
     def from_file(file_path: str) -> Graph:
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             graph = Graph(**json.load(f))
         return graph
 
@@ -158,16 +158,16 @@ class KGGen:
 
     def generate(
         self,
-        input_data: Union[str, List[Dict]],
+        input_data: str | list[dict],
         model: str = None,
         api_key: str = None,
         api_base: str = None,
         context: str = "",
-        chunk_size: Optional[int] = None,
+        chunk_size: int | None = None,
         reasoning_effort: str = None,
         deduplication_method: DeduplicateMethod | None = DeduplicateMethod.SEMHASH,
         temperature: float = None,
-        output_folder: Optional[str] = None,
+        output_folder: str | None = None,
     ) -> Graph:
         """Generate a knowledge graph from input text or messages.
 
@@ -320,7 +320,7 @@ class KGGen:
 
     # ====== Retrieval Methods ======
 
-    def _parse_embedding_model(self, model: Optional[SentenceTransformer] = None) -> Optional[SentenceTransformer]:
+    def _parse_embedding_model(self, model: SentenceTransformer | None = None) -> SentenceTransformer | None:
         if model is None:
             model = self.retrieval_model
         if model is None:
@@ -340,8 +340,8 @@ class KGGen:
 
     def generate_embeddings(
         self,
-        graph: Union[Graph, nx.DiGraph],
-        model: Optional[SentenceTransformer] = None,
+        graph: Graph | nx.DiGraph,
+        model: SentenceTransformer | None = None,
     ) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray]]:
         model = self._parse_embedding_model(model)
         if isinstance(graph, Graph):
@@ -360,7 +360,7 @@ class KGGen:
         query: str,
         node_embeddings: dict[str, np.ndarray],
         graph: nx.DiGraph,
-        model: Optional[SentenceTransformer] = None,
+        model: SentenceTransformer | None = None,
         k: int = 8,
         verbose: bool = False,
     ) -> tuple[list[tuple[str, float]], set[str], str]:
@@ -435,7 +435,7 @@ class KGGen:
     def reset_token_usage(self):
         self.lm.history = []
 
-    def extract_token_usage_from_history(self) -> Dict[str, int]:
+    def extract_token_usage_from_history(self) -> dict[str, int]:
         """Extract token usage from dspy LM history."""
 
         total_prompt_tokens = 0
@@ -462,10 +462,10 @@ class KGGen:
 
     def build_entity_extraction_requests(
         self,
-        texts: List[Dict[str, Any]],
+        texts: list[dict[str, Any]],
         config: BatchRequestConfig,
-        chunk_size: Optional[int] = None,
-    ) -> List[Dict[str, Any]]:
+        chunk_size: int | None = None,
+    ) -> list[dict[str, Any]]:
         """Build entity extraction requests for the OpenAI Batch API.
 
         Args:
@@ -494,12 +494,12 @@ class KGGen:
 
     def build_relation_extraction_requests(
         self,
-        texts: List[Dict[str, Any]],
-        entities_by_content: Dict[str, List[str]],
+        texts: list[dict[str, Any]],
+        entities_by_content: dict[str, list[str]],
         config: BatchRequestConfig,
-        chunk_size: Optional[int] = None,
+        chunk_size: int | None = None,
         context: str = "",
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Build relation extraction requests for the OpenAI Batch API.
 
         Args:
@@ -528,11 +528,11 @@ class KGGen:
 
     def build_deduplication_requests(
         self,
-        items: List[str],
-        candidates_per_item: Dict[str, List[str]],
+        items: list[str],
+        candidates_per_item: dict[str, list[str]],
         item_type: str = "entity",
-        config: Optional[BatchRequestConfig] = None,
-    ) -> List[Dict[str, Any]]:
+        config: BatchRequestConfig | None = None,
+    ) -> list[dict[str, Any]]:
         """Build deduplication requests for the OpenAI Batch API.
 
         Args:

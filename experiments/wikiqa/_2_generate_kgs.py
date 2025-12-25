@@ -1,14 +1,13 @@
-from concurrent.futures import ThreadPoolExecutor
 import json
-from typing import Literal
-from kg_gen.kg_gen import KGGen
-import pandas as pd
 import os
+from concurrent.futures import ThreadPoolExecutor
+from typing import Literal
+
 import dspy
+import pandas as pd
 import typer
-
 from experiments.wikiqa._1_download_articles import sanitize_filename
-
+from kg_gen.kg_gen import KGGen
 
 BASE_PATH = "data/wiki_qa"
 OUTPUT_ARTICLES_DIR = f"{BASE_PATH}/articles"
@@ -61,7 +60,7 @@ def clean_rows_article_no_response(split_name: Literal["train", "test", "validat
 
             if os.path.exists(article_path):
                 q, a = row["question"], row["answer"]
-                with open(article_path, "r") as f:
+                with open(article_path) as f:
                     article_text = f.read()
                 predict = dspy.Predict(ArticleNoAnswer)
                 try:
@@ -124,7 +123,7 @@ def main(split_name: str):
                     print(f"KG already exists for '{title}'")
                     return {"status": "skipped", "title": title}
 
-                with open(article_path, "r") as f:
+                with open(article_path) as f:
                     article = f.read()
 
                 graph_chunked = kg.generate(

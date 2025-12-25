@@ -2,10 +2,9 @@
 Test that storage paths are resolved correctly relative to where the command is called.
 """
 
-import pytest
 import os
-import tempfile
 import subprocess
+import tempfile
 from pathlib import Path
 
 
@@ -69,8 +68,9 @@ def test_server_path_resolution():
     if server_dir not in sys.path:
         sys.path.insert(0, server_dir)
 
-    import server
     from unittest.mock import patch
+
+    import server
 
     with tempfile.TemporaryDirectory() as temp_dir:
         # Test with relative path
@@ -149,7 +149,7 @@ def test_cli_path_resolution_integration():
         # We use --help to avoid actually starting the server
         result = subprocess.run(
             ["python", "-m", "kg_gen.cli", "mcp", "--help"],
-            cwd=test_dir,
+            check=False, cwd=test_dir,
             capture_output=True,
             text=True,
         )

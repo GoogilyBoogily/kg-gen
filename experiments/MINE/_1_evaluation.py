@@ -1,16 +1,17 @@
-from dotenv import load_dotenv
-import dspy
-from datasets import load_dataset
-from kg_gen.steps._3_deduplicate import DeduplicateMethod
-import numpy as np
-import networkx as nx
-from kg_gen.kg_gen import KGGen
 import json
-import sys
 import os
-from typing import Literal
-import typer
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Literal
+
+import dspy
+import networkx as nx
+import numpy as np
+import typer
+from datasets import load_dataset
+from dotenv import load_dotenv
+from kg_gen.kg_gen import KGGen
+from kg_gen.steps._3_deduplicate import DeduplicateMethod
 
 # Add the src directory to Python path to import from source code
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -138,7 +139,7 @@ def process_single_evaluation(
         )
         return (i, True, f"Successfully processed {output_file}")
     except Exception as e:
-        return (i, False, f"Error processing {output_file}: {str(e)}")
+        return (i, False, f"Error processing {output_file}: {e!s}")
 
 
 def main(

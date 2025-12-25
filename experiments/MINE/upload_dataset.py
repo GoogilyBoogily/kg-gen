@@ -1,11 +1,12 @@
 import json
 import os
+from typing import Any
+
 from datasets import Dataset, DatasetDict
 from huggingface_hub import whoami
-from typing import List, Dict, Any
 
 
-def extract_accuracy(responses: Dict[str, Any] | None) -> float | None:
+def extract_accuracy(responses: dict[str, Any] | None) -> float | None:
     """Extract accuracy from response object and convert to float"""
     if responses is None:
         return None
@@ -26,15 +27,15 @@ def extract_accuracy(responses: Dict[str, Any] | None) -> float | None:
     return None
 
 
-def load_kg_queries_and_essays() -> List[Dict[str, Any]]:
+def load_kg_queries_and_essays() -> list[dict[str, Any]]:
     """Load all KG JSON files, their corresponding generated queries, essays, and evaluation results"""
 
     # Load answers (generated queries)
-    with open("experiments/MINE/answers.json", "r") as f:
+    with open("experiments/MINE/answers.json") as f:
         all_answers = json.load(f)
 
     # Load essays
-    with open("experiments/MINE/essays.json", "r") as f:
+    with open("experiments/MINE/essays.json") as f:
         all_essays = json.load(f)
 
     # Find all {i}.json files (excluding {i}_results*.json)
@@ -58,7 +59,7 @@ def load_kg_queries_and_essays() -> List[Dict[str, Any]]:
 
     for idx, file_path in kg_files:
         # Load KG data
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             kg_data = json.load(f)
 
         # Load KG responses data
@@ -69,14 +70,14 @@ def load_kg_queries_and_essays() -> List[Dict[str, Any]]:
             if not os.path.exists(kg_responses_path):
                 kg_responses_path = file_path.replace(".json", "_resultsN.json")
         if os.path.exists(kg_responses_path):
-            with open(kg_responses_path, "r") as f:
+            with open(kg_responses_path) as f:
                 kg_responses = json.load(f)
         else:
             kg_responses = None
 
         graphrag_file_path = file_path.replace("kggen", "GraphRAG")
         if os.path.exists(graphrag_file_path):
-            with open(graphrag_file_path, "r") as f:
+            with open(graphrag_file_path) as f:
                 graphrag_data = json.load(f)
         else:
             graphrag_data = None
@@ -84,14 +85,14 @@ def load_kg_queries_and_essays() -> List[Dict[str, Any]]:
         # Load GraphRAG responses data
         graphrag_responses_path = graphrag_file_path.replace(".json", "_resultsG.json")
         if os.path.exists(graphrag_responses_path):
-            with open(graphrag_responses_path, "r") as f:
+            with open(graphrag_responses_path) as f:
                 graphrag_responses = json.load(f)
         else:
             graphrag_responses = None
 
         openie_file_path = file_path.replace("kggen", "OpenIE")
         if os.path.exists(openie_file_path):
-            with open(openie_file_path, "r") as f:
+            with open(openie_file_path) as f:
                 openie_data = json.load(f)
         else:
             openie_data = None
@@ -99,7 +100,7 @@ def load_kg_queries_and_essays() -> List[Dict[str, Any]]:
         # Load OpenIE responses data
         openie_responses_path = openie_file_path.replace(".json", "_resultsST.json")
         if os.path.exists(openie_responses_path):
-            with open(openie_responses_path, "r") as f:
+            with open(openie_responses_path) as f:
                 openie_responses = json.load(f)
         else:
             openie_responses = None

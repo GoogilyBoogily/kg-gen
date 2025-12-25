@@ -1,8 +1,6 @@
 import os
+
 from src.kg_gen import KGGen
-from dotenv import load_dotenv
-import pytest
-from fixtures import kg
 
 API_BASE = os.getenv("API_BASE")
 
@@ -87,4 +85,4 @@ def test_multiple_models(kg: KGGen):
             graph = kg.generate(input_data=text, model=config["model"], api_key=config["api_key"])
             print(graph)
         except Exception as e:
-            print(f"Error with {config['model']}: {str(e)}")
+            print(f"Error with {config['model']}: {e!s}")

@@ -1,9 +1,10 @@
+import enum
+
+import dspy
 from kg_gen.models import Graph
 from kg_gen.utils.deduplicate import run_semhash_deduplication
 from kg_gen.utils.llm_deduplicate import LLMDeduplicate
 from sentence_transformers import SentenceTransformer
-import dspy
-import enum
 
 
 class DeduplicateMethod(enum.Enum):

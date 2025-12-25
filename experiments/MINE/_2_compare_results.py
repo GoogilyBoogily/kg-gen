@@ -6,10 +6,11 @@ Automatically discovers and compares all directories.
 """
 
 import json
+from itertools import combinations
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
-from pathlib import Path
-from itertools import combinations
 
 
 def discover_result_directories(results_folder="results"):
@@ -42,7 +43,7 @@ def read_accuracies_from_folder(folder_path):
 
     for json_file in json_files:
         try:
-            with open(json_file, "r") as f:
+            with open(json_file) as f:
                 data = json.load(f)
                 # The accuracy is the last element in the array
                 if isinstance(data, list) and len(data) > 0:

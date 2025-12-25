@@ -3,12 +3,10 @@ Simplified MCP server tests without async functionality.
 These tests verify the server structure and tool definitions.
 """
 
-import pytest
 import os
 import tempfile
-import json
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 
 def test_mcp_server_structure():
@@ -94,25 +92,24 @@ def test_add_memories_no_instance():
 
     import server
 
-    with patch("server.kg_gen_instance", None):
-        with patch("server.memory_graph", None):
-            with patch("server.initialize_kg_gen") as mock_init:
-                mock_kg_gen = MagicMock()
-                mock_graph = MagicMock()
-                mock_graph.entities = {"test"}
-                mock_graph.relations = {("a", "b", "c")}
-                mock_kg_gen.generate.return_value = mock_graph
-                mock_kg_gen.aggregate.return_value = mock_graph
-                mock_init.return_value = mock_kg_gen
+    with patch("server.kg_gen_instance", None), patch("server.memory_graph", None):
+        with patch("server.initialize_kg_gen") as mock_init:
+            mock_kg_gen = MagicMock()
+            mock_graph = MagicMock()
+            mock_graph.entities = {"test"}
+            mock_graph.relations = {("a", "b", "c")}
+            mock_kg_gen.generate.return_value = mock_graph
+            mock_kg_gen.aggregate.return_value = mock_graph
+            mock_init.return_value = mock_kg_gen
 
-                with patch("server.save_memory_graph", return_value=True):
-                    # Set the global variable that the function will modify
-                    with patch("server.kg_gen_instance", mock_kg_gen):
-                        result = server.add_memories.fn("Test text")
+            with patch("server.save_memory_graph", return_value=True):
+                # Set the global variable that the function will modify
+                with patch("server.kg_gen_instance", mock_kg_gen):
+                    result = server.add_memories.fn("Test text")
 
-                # Should have attempted to initialize kg_gen
-                assert isinstance(result, str)
-                assert "Successfully extracted and stored memories" in result
+            # Should have attempted to initialize kg_gen
+            assert isinstance(result, str)
+            assert "Successfully extracted and stored memories" in result
 
 
 @patch("server.memory_graph", None)
@@ -187,9 +184,8 @@ def test_visualize_memories_with_data():
     with tempfile.TemporaryDirectory() as temp_dir:
         output_path = os.path.join(temp_dir, "test.html")
 
-        with patch("server.memory_graph", mock_graph):
-            with patch("server.KGGen.visualize") as mock_visualize:
-                result = server.visualize_memories.fn(output_path)
+        with patch("server.memory_graph", mock_graph), patch("server.KGGen.visualize") as mock_visualize:
+            result = server.visualize_memories.fn(output_path)
 
         assert isinstance(result, str)
         assert output_path in result
@@ -214,9 +210,8 @@ def test_get_memory_stats():
     mock_graph.entity_clusters = {"people": {"Alice"}}
     mock_graph.edge_clusters = {"employment": {"works for"}}
 
-    with patch("server.memory_graph", mock_graph):
-        with patch("server.storage_path", "test_path.json"):
-            result = server.get_memory_stats.fn()
+    with patch("server.memory_graph", mock_graph), patch("server.storage_path", "test_path.json"):
+        result = server.get_memory_stats.fn()
 
     assert isinstance(result, str)
     assert "Memory Statistics" in result

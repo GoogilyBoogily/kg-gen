@@ -2,12 +2,11 @@
 Test that memory JSON files are actually created and used properly.
 """
 
-import pytest
+import json
 import os
 import tempfile
-import json
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 
 def test_memory_file_creation_and_loading():
@@ -50,7 +49,7 @@ def test_memory_file_creation_and_loading():
                 assert os.path.exists(storage_path), f"Memory file should be created at {storage_path}"
 
                 # Verify file contents
-                with open(storage_path, "r") as f:
+                with open(storage_path) as f:
                     saved_data = json.load(f)
 
                 assert "entities" in saved_data

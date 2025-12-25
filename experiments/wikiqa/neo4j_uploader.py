@@ -49,7 +49,6 @@ Notes
 - Validate on large graphs before promoting into the core package
 """
 
-from typing import Optional
 
 try:
     # Optional import; this script is a thin wrapper used in experiments
@@ -64,7 +63,7 @@ def upload_graph_experiment(
     username: str,
     password: str,
     database: str = "neo4j",
-    graph_name: Optional[str] = None,
+    graph_name: str | None = None,
     clear_existing: bool = False,
 ) -> bool:
     """Minimal helper for experiments to upload a graph to Neo4j.

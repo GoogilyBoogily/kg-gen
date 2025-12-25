@@ -1,4 +1,5 @@
 import argparse
+
 import nltk
 
 
@@ -86,7 +87,7 @@ def main():
 
     # Read the input text
     if args.input_file:
-        with open(args.input_file, "r", encoding="utf-8") as f:
+        with open(args.input_file, encoding="utf-8") as f:
             text = f.read()
     else:
         import sys

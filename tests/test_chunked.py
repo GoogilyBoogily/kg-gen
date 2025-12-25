@@ -1,10 +1,9 @@
+
 from src.kg_gen import KGGen
-import os
-from fixtures import kg
 
 
 def test_chunked(kg: KGGen):
-    with open("tests/data/kingkiller_chapter_one.txt", "r", encoding="utf-8") as f:
+    with open("tests/data/kingkiller_chapter_one.txt", encoding="utf-8") as f:
         text = f.read()
 
     graph = kg.generate(
@@ -46,7 +45,7 @@ def test_chunked(kg: KGGen):
 
 def test_chunk_and_cluster(kg: KGGen):
     # Load fresh wiki content
-    with open("tests/data/fresh_wiki_article.md", "r", encoding="utf-8") as f:
+    with open("tests/data/fresh_wiki_article.md", encoding="utf-8") as f:
         text = f.read()
 
     # # Generate graph from wiki text with chunking

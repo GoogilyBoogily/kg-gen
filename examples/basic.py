@@ -1,7 +1,8 @@
-from kg_gen.models import Graph  # noqa: F401
-from kg_gen import KGGen
 import json  # noqa: F401
-import os  # noqa: F401
+import os
+
+from kg_gen import KGGen
+from kg_gen.models import Graph  # noqa: F401
 
 text = """
 A Place for Demons

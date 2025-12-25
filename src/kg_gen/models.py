@@ -1,15 +1,15 @@
 import json
+
 from pydantic import BaseModel, Field
-from typing import Any, Tuple, Optional
 
 
 # ~~~ DATA STRUCTURES ~~~
 class Graph(BaseModel):
     entities: set[str] = Field(..., description="All entities including additional ones from response")
     edges: set[str] = Field(..., description="All edges")
-    relations: set[Tuple[str, str, str]] = Field(..., description="List of (subject, predicate, object) triples")
-    entity_clusters: Optional[dict[str, set[str]]] = None
-    edge_clusters: Optional[dict[str, set[str]]] = None
+    relations: set[tuple[str, str, str]] = Field(..., description="List of (subject, predicate, object) triples")
+    entity_clusters: dict[str, set[str]] | None = None
+    edge_clusters: dict[str, set[str]] | None = None
 
     entity_metadata: dict[str, set[str]] | None = None
 
@@ -19,7 +19,7 @@ class Graph(BaseModel):
         Load the graph from a file.
         Fix graph entities and edges for missing ones defined in relations.
         """
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             data = json.load(f)
             graph = Graph.model_validate(data)
 
@@ -41,7 +41,7 @@ class Graph(BaseModel):
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(self.model_dump_json(indent=2))
 
-    def stats(self, name: Optional[str] = None):
+    def stats(self, name: str | None = None):
         """
         Print the stats of the graph.
         """

@@ -3,15 +3,16 @@
 Simple Streamlit dashboard to view knowledge graph evaluation results in a table.
 """
 
-import streamlit as st
 import json
-from pathlib import Path
-from datasets import load_dataset
-import pandas as pd
-from kg_gen import KGGen
-from kg_gen.models import Graph
 import urllib.request
 import zipfile
+from pathlib import Path
+
+import pandas as pd
+import streamlit as st
+from datasets import load_dataset
+from kg_gen import KGGen
+from kg_gen.models import Graph
 
 st.set_page_config(page_title="KG Evaluation Results", layout="wide")
 
@@ -43,9 +44,8 @@ def ensure_results_exist():
             urllib.request.urlretrieve(RESULTS_URL, zip_path)
 
         # Extract the zip file
-        with st.spinner("Extracting results..."):
-            with zipfile.ZipFile(zip_path, "r") as zip_ref:
-                zip_ref.extractall(mine_dir)
+        with st.spinner("Extracting results..."), zipfile.ZipFile(zip_path, "r") as zip_ref:
+            zip_ref.extractall(mine_dir)
 
         # Clean up the zip file
         zip_path.unlink()
@@ -53,7 +53,7 @@ def ensure_results_exist():
         st.success("✅ Results downloaded and extracted successfully!")
 
     except Exception as e:
-        st.error(f"❌ Failed to download results: {str(e)}")
+        st.error(f"❌ Failed to download results: {e!s}")
         st.info("Please manually download from: " + RESULTS_URL)
         raise
 
@@ -97,14 +97,14 @@ def load_all_results(results_folder=None):
         for json_file in json_files:
             try:
                 idx = int(json_file.stem.split("_")[1])
-                with open(json_file, "r") as f:
+                with open(json_file) as f:
                     data = json.load(f)
                     # Remove accuracy summary if present
                     if isinstance(data, list) and len(data) > 0:
                         if isinstance(data[-1], dict) and "accuracy" in data[-1] and len(data[-1]) == 1:
                             data = data[:-1]
                     model_results[idx] = data
-            except Exception as e:
+            except Exception:
                 pass
 
         if model_results:
@@ -119,7 +119,7 @@ def load_kg_file(model_name: str, essay_idx: int, results_folder=None):
         results_folder = RESULTS_DIR
     kg_path = Path(results_folder) / model_name / f"kg_{essay_idx}.json"
     if kg_path.exists():
-        with open(kg_path, "r") as f:
+        with open(kg_path) as f:
             kg_data = json.load(f)
         return Graph(**kg_data)
     return None

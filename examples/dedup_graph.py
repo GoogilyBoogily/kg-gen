@@ -1,14 +1,14 @@
+import logging
 import os
 import time
-import logging
-from dotenv import load_dotenv
-import dspy
-from sentence_transformers import SentenceTransformer
-import typer
 
-from kg_gen.utils.llm_deduplicate import LLMDeduplicate
-from kg_gen.utils.deduplicate import run_semhash_deduplication
+import dspy
+import typer
+from dotenv import load_dotenv
 from kg_gen.models import Graph
+from kg_gen.utils.deduplicate import run_semhash_deduplication
+from kg_gen.utils.llm_deduplicate import LLMDeduplicate
+from sentence_transformers import SentenceTransformer
 
 app = typer.Typer()
 

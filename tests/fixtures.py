@@ -1,7 +1,8 @@
+import os
+
+import pytest
 from dotenv import load_dotenv
 from src.kg_gen import KGGen
-import os
-import pytest
 
 load_dotenv()
 

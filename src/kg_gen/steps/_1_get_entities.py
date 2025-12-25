@@ -1,4 +1,4 @@
-from typing import List
+
 import dspy
 
 
@@ -19,7 +19,7 @@ class ConversationEntities(dspy.Signature):
     entities: list[str] = dspy.OutputField(desc="THOROUGH list of key entities")
 
 
-def get_entities(input_data: str, is_conversation: bool = False) -> List[str]:
+def get_entities(input_data: str, is_conversation: bool = False) -> list[str]:
     extract = dspy.Predict(ConversationEntities) if is_conversation else dspy.Predict(TextEntities)
     result = extract(source_text=input_data)
     return result.entities

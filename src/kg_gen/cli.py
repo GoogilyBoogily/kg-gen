@@ -4,11 +4,11 @@ Command line interface for kg-gen.
 """
 
 import argparse
+import importlib.util
+import os
 import subprocess
 import sys
-import os
 from pathlib import Path
-import importlib.util
 
 
 def check_and_install_mcp_dependencies():

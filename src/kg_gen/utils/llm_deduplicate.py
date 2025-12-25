@@ -1,14 +1,14 @@
-from typing import List
-from scipy.spatial.distance import cdist
-from concurrent.futures import ThreadPoolExecutor
-import dspy
-from kg_gen.models import Graph
 import logging
-from sklearn.metrics.pairwise import cosine_similarity
-from rank_bm25 import BM25Okapi
-from sentence_transformers import SentenceTransformer
+from concurrent.futures import ThreadPoolExecutor
+
+import dspy
 import numpy as np
+from kg_gen.models import Graph
+from rank_bm25 import BM25Okapi
+from scipy.spatial.distance import cdist
+from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 class LLMDeduplicate:
@@ -101,7 +101,7 @@ class LLMDeduplicate:
             assignments = np.argsort(distances, axis=1)
 
             # Initialize cluster tracking
-            clusters: List[List[int]] = [[] for _ in range(num_clusters)]
+            clusters: list[list[int]] = [[] for _ in range(num_clusters)]
             assigned = np.zeros(n_samples, dtype=bool)
 
             for rank in range(num_clusters):

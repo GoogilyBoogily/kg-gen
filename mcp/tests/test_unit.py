@@ -3,23 +3,22 @@ Unit tests for core MCP server functions.
 These tests focus on individual functions without the full MCP client setup.
 """
 
-import pytest
-import os
-import tempfile
 import json
-from pathlib import Path
-from unittest.mock import patch, MagicMock
+import os
 
 # Import the server module
 import sys
+import tempfile
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from server import (
     initialize_kg_gen,
     load_memory_graph,
     save_memory_graph,
-    memory_graph,
-    storage_path,
 )
 
 
@@ -108,20 +107,19 @@ class TestLoadMemoryGraph:
             json.dump(sample_graph_data, f)
 
         # Patch the global storage_path
-        with patch("server.storage_path", temp_storage_file):
-            with patch("server.Graph") as mock_graph:
-                mock_graph_instance = MagicMock()
-                mock_graph.return_value = mock_graph_instance
+        with patch("server.storage_path", temp_storage_file), patch("server.Graph") as mock_graph:
+            mock_graph_instance = MagicMock()
+            mock_graph.return_value = mock_graph_instance
 
-                load_memory_graph()
+            load_memory_graph()
 
-                # Verify Graph was created with correct data
-                mock_graph.assert_called_once()
-                call_args = mock_graph.call_args[1]
+            # Verify Graph was created with correct data
+            mock_graph.assert_called_once()
+            call_args = mock_graph.call_args[1]
 
-                assert call_args["entities"] == set(sample_graph_data["entities"])
-                assert call_args["relations"] == {tuple(rel) for rel in sample_graph_data["relations"]}
-                assert call_args["edges"] == set(sample_graph_data["edges"])
+            assert call_args["entities"] == set(sample_graph_data["entities"])
+            assert call_args["relations"] == {tuple(rel) for rel in sample_graph_data["relations"]}
+            assert call_args["edges"] == set(sample_graph_data["edges"])
 
     def test_load_nonexistent_file(self, temp_storage_file):
         """Test loading when storage file doesn't exist."""
@@ -129,15 +127,14 @@ class TestLoadMemoryGraph:
         if os.path.exists(temp_storage_file):
             os.unlink(temp_storage_file)
 
-        with patch("server.storage_path", temp_storage_file):
-            with patch("server.Graph") as mock_graph:
-                mock_graph_instance = MagicMock()
-                mock_graph.return_value = mock_graph_instance
+        with patch("server.storage_path", temp_storage_file), patch("server.Graph") as mock_graph:
+            mock_graph_instance = MagicMock()
+            mock_graph.return_value = mock_graph_instance
 
-                load_memory_graph()
+            load_memory_graph()
 
-                # Verify empty Graph was created
-                mock_graph.assert_called_once_with(entities=set(), relations=set(), edges=set())
+            # Verify empty Graph was created
+            mock_graph.assert_called_once_with(entities=set(), relations=set(), edges=set())
 
     def test_load_corrupted_file(self, temp_storage_file):
         """Test loading when storage file is corrupted."""
@@ -145,15 +142,14 @@ class TestLoadMemoryGraph:
         with open(temp_storage_file, "w") as f:
             f.write("invalid json content")
 
-        with patch("server.storage_path", temp_storage_file):
-            with patch("server.Graph") as mock_graph:
-                mock_graph_instance = MagicMock()
-                mock_graph.return_value = mock_graph_instance
+        with patch("server.storage_path", temp_storage_file), patch("server.Graph") as mock_graph:
+            mock_graph_instance = MagicMock()
+            mock_graph.return_value = mock_graph_instance
 
-                load_memory_graph()
+            load_memory_graph()
 
-                # Should create empty graph on error
-                mock_graph.assert_called_once_with(entities=set(), relations=set(), edges=set())
+            # Should create empty graph on error
+            mock_graph.assert_called_once_with(entities=set(), relations=set(), edges=set())
 
 
 class TestSaveMemoryGraph:
@@ -168,9 +164,8 @@ class TestSaveMemoryGraph:
         mock_graph.entity_clusters = {"people": {"Alice"}}
         mock_graph.edge_clusters = {"employment": {"works for"}}
 
-        with patch("server.storage_path", temp_storage_file):
-            with patch("server.memory_graph", mock_graph):
-                result = save_memory_graph()
+        with patch("server.storage_path", temp_storage_file), patch("server.memory_graph", mock_graph):
+            result = save_memory_graph()
 
         assert result is True
 
@@ -178,7 +173,7 @@ class TestSaveMemoryGraph:
         assert os.path.exists(temp_storage_file)
 
         # Verify content
-        with open(temp_storage_file, "r") as f:
+        with open(temp_storage_file) as f:
             data = json.load(f)
 
         assert set(data["entities"]) == {"Alice", "Google"}
@@ -187,9 +182,8 @@ class TestSaveMemoryGraph:
 
     def test_save_graph_no_graph(self, temp_storage_file):
         """Test saving when no graph exists."""
-        with patch("server.storage_path", temp_storage_file):
-            with patch("server.memory_graph", None):
-                result = save_memory_graph()
+        with patch("server.storage_path", temp_storage_file), patch("server.memory_graph", None):
+            result = save_memory_graph()
 
         assert result is False
 
@@ -205,9 +199,8 @@ class TestSaveMemoryGraph:
         # Use a directory path to force a write error
         invalid_path = "/invalid/path/file.json"
 
-        with patch("server.storage_path", invalid_path):
-            with patch("server.memory_graph", mock_graph):
-                result = save_memory_graph()
+        with patch("server.storage_path", invalid_path), patch("server.memory_graph", mock_graph):
+            result = save_memory_graph()
 
         assert result is False
 
@@ -225,13 +218,12 @@ class TestMemoryGraphOperations:
         with open(temp_storage_file, "w") as f:
             json.dump(graph_data, f)
 
-        with patch("server.storage_path", temp_storage_file):
-            with patch("server.Graph") as mock_graph:
-                load_memory_graph()
+        with patch("server.storage_path", temp_storage_file), patch("server.Graph") as mock_graph:
+            load_memory_graph()
 
-                call_args = mock_graph.call_args[1]
-                assert call_args["entity_clusters"] is None
-                assert call_args["edge_clusters"] is None
+            call_args = mock_graph.call_args[1]
+            assert call_args["entity_clusters"] is None
+            assert call_args["edge_clusters"] is None
 
     def test_graph_with_empty_clusters(self, temp_storage_file, sample_graph_data):
         """Test loading graph with empty clusters."""
@@ -243,14 +235,13 @@ class TestMemoryGraphOperations:
         with open(temp_storage_file, "w") as f:
             json.dump(graph_data, f)
 
-        with patch("server.storage_path", temp_storage_file):
-            with patch("server.Graph") as mock_graph:
-                load_memory_graph()
+        with patch("server.storage_path", temp_storage_file), patch("server.Graph") as mock_graph:
+            load_memory_graph()
 
-                call_args = mock_graph.call_args[1]
-                # Empty dictionaries get converted to None by the server logic
-                assert call_args["entity_clusters"] is None
-                assert call_args["edge_clusters"] is None
+            call_args = mock_graph.call_args[1]
+            # Empty dictionaries get converted to None by the server logic
+            assert call_args["entity_clusters"] is None
+            assert call_args["edge_clusters"] is None
 
 
 class TestEnvironmentHandling:
@@ -260,13 +251,12 @@ class TestEnvironmentHandling:
         """Test fallback to OPENAI_API_KEY when KG_API_KEY is not set."""
         test_env = {"OPENAI_API_KEY": "openai-key", "KG_MODEL": "test-model"}
 
-        with patch.dict(os.environ, test_env, clear=True):
-            with patch("server.KGGen") as mock_kg_gen:
-                with patch("server.load_memory_graph"):
-                    initialize_kg_gen()
+        with patch.dict(os.environ, test_env, clear=True), patch("server.KGGen") as mock_kg_gen:
+            with patch("server.load_memory_graph"):
+                initialize_kg_gen()
 
-                    # Should use OPENAI_API_KEY as fallback
-                    mock_kg_gen.assert_called_once_with(model="test-model", temperature=0.0, api_key="openai-key")
+                # Should use OPENAI_API_KEY as fallback
+                mock_kg_gen.assert_called_once_with(model="test-model", temperature=0.0, api_key="openai-key")
 
     def test_kg_api_key_priority(self):
         """Test that KG_API_KEY takes priority over OPENAI_API_KEY."""
@@ -276,10 +266,9 @@ class TestEnvironmentHandling:
             "KG_MODEL": "test-model",
         }
 
-        with patch.dict(os.environ, test_env, clear=True):
-            with patch("server.KGGen") as mock_kg_gen:
-                with patch("server.load_memory_graph"):
-                    initialize_kg_gen()
+        with patch.dict(os.environ, test_env, clear=True), patch("server.KGGen") as mock_kg_gen:
+            with patch("server.load_memory_graph"):
+                initialize_kg_gen()
 
-                    # Should use KG_API_KEY
-                    mock_kg_gen.assert_called_once_with(model="test-model", temperature=0.0, api_key="kg-key")
+                # Should use KG_API_KEY
+                mock_kg_gen.assert_called_once_with(model="test-model", temperature=0.0, api_key="kg-key")
