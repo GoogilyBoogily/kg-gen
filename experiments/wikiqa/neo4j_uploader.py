@@ -49,7 +49,6 @@ Notes
 - Validate on large graphs before promoting into the core package
 """
 
-
 try:
     # Optional import; this script is a thin wrapper used in experiments
     from kg_gen.utils.neo4j_integration import upload_to_neo4j  # type: ignore

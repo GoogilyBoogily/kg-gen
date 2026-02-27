@@ -149,7 +149,8 @@ def test_cli_path_resolution_integration():
         # We use --help to avoid actually starting the server
         result = subprocess.run(
             ["python", "-m", "kg_gen.cli", "mcp", "--help"],
-            check=False, cwd=test_dir,
+            check=False,
+            cwd=test_dir,
             capture_output=True,
             text=True,
         )
